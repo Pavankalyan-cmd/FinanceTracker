@@ -1,0 +1,194 @@
+/* Base styles */
+.transactions-page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 0;
+  }
+  
+  .transactions-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .transactions-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .transactions-actions {
+    display: flex;
+    gap: 12px;
+  }
+  .filter-btn, .export-btn {
+    text-transform: none !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    padding: 6px 22px !important;
+  }
+  
+  .transactions-list {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(30, 203, 107, 0.06);
+    padding: 0;
+    overflow: hidden;
+  }
+  .transaction-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f1f3;
+    padding: 0 32px;
+    min-height: 72px;
+  }
+  .transaction-row:last-child {
+    border-bottom: none;
+  }
+  .transaction-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .transaction-icon {
+    background: #f5f7fa;
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .transaction-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .transaction-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .transactions-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .transaction-date {
+    color: #8a94a6;
+    font-size: 0.98rem;
+  }
+  .transaction-details {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .transaction-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-width: 100px;
+    text-align: right;
+  }
+  .transaction-amount.green { color: #1ecb6b; }
+  .transaction-amount.red { color: #f44336; }
+  .transaction-amount.orange { color: #f59e42; }
+  .transaction-amount.blue { color: #1ea7fd; }
+  .transaction-amount.purple { color: #c678dd; }
+  .transaction-amount.yellow { color: #e6c200; }
+  
+  .transaction-confidence {
+    color: #8a94a6;
+    font-size: 0.98rem;
+    min-width: 90px;
+    text-align: right;
+  }
+  
+  .category-badge {
+    border-radius: 8px;
+    padding: 4px 14px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #222;
+    background: #f5f7fa;
+    display: inline-block;
+    min-width: 70px;
+    text-align: center;
+  }
+  .category-badge.orange { background: #fff4e5; color: #f59e42; }
+  .category-badge.green { background: #e8f9f0; color: #1ecb6b; }
+  .category-badge.purple { background: #f3eaff; color: #a259e6; }
+  .category-badge.blue { background: #eaf6ff; color: #1ea7fd; }
+  .category-badge.yellow { background: #fffbe5; color: #e6c200; }
+  
+  .review-btn {
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    padding: 4px 18px !important;
+    text-transform: none !important;
+    background: #fff !important;
+    border: 1.5px solid #d3e0ea !important;
+    color: #222 !important;
+    margin-left: 8px !important;
+  }
+  .review-btn:hover {
+    background: #f5f7fa !important;
+    border-color: #1ea7fd !important;
+  }
+  
+  /* Responsive breakpoints */
+  @media only screen and (max-width: 600px) {
+    .transactions-page {
+      padding: 12px 0;
+    }
+    .transactions-header-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .transactions-title {
+      font-size: 1.3rem;
+    }
+    .transactions-list {
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(30, 203, 107, 0.04);
+    }
+    .transaction-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 0 10px;
+      min-height: 60px;
+    }
+    .transaction-details {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .transaction-amount, .transaction-confidence, .category-badge {
+      min-width: unset;
+      text-align: left;
+    }
+  }
+  @media only screen and (min-width: 600px) {
+    .transactions-page {
+      padding: 20px 0;
+    }
+  }
+  @media only screen and (min-width: 768px) {
+    .transactions-page {
+      padding: 28px 0;
+    }
+  }
+  @media only screen and (min-width: 992px) {
+    .transactions-page {
+      padding: 32px 0;
+    }
+  }
+  @media only screen and (min-width: 1200px) {
+    .transactions-page {
+      padding: 40px 0;
+    }
+  } 

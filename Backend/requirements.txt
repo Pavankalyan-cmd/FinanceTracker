@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-multipart
+firebase-admin
+python-dotenv
+google-generativeai
+PyMuPDF

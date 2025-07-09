@@ -1,0 +1,227 @@
+body, html {
+  background: #f7faff;
+}
+.login-root {
+  min-height: 100vh;
+  background: #f7faff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.login-back-home {
+  position: absolute;
+  top: 32px;
+  right: 48px;
+  color: #1ea7fd;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+.login-back-home:hover {
+  text-decoration: underline;
+}
+.login-header {
+  margin-top: 48px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.login-app-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+}
+.login-app-desc {
+  color: #8a94a6;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.login-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(30, 203, 107, 0.08);
+  padding: 38px 32px 32px 32px;
+  max-width: 420px;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+.login-card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  text-align: left;
+}
+.login-card-desc {
+  color: #8a94a6;
+  font-size: 1.02rem;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.login-google-btn {
+  background: linear-gradient(90deg, #f857a6 0%, #ff5858 100%) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  font-size: 1.05rem !important;
+  margin-bottom: 12px !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 8px rgba(248, 87, 166, 0.08);
+}
+.login-github-btn {
+  background: linear-gradient(90deg, #232526 0%, #414345 100%) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  font-size: 1.05rem !important;
+  margin-bottom: 18px !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 8px rgba(35, 37, 38, 0.08);
+}
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #b0b8c1;
+  font-size: 0.98rem;
+  margin: 18px 0 8px 0;
+}
+.login-divider span {
+  flex: 1;
+  border-bottom: 1px solid #e0e6ed;
+  margin: 0 8px;
+  line-height: 0.1em;
+  font-size: 0.98rem;
+  color: #b0b8c1;
+  font-weight: 500;
+  position: relative;
+  top: 0.5em;
+}
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.login-input {
+  margin-bottom: 8px !important;
+}
+.login-row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.login-remember .MuiFormControlLabel-label {
+  font-size: 1rem;
+  color: #8a94a6;
+}
+.login-forgot {
+  color: #1ea7fd;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.login-forgot:hover {
+  text-decoration: underline;
+}
+.login-signin-btn {
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  font-size: 1.1rem !important;
+  padding: 12px 0 !important;
+  text-transform: none !important;
+  margin-top: 8px !important;
+  background: linear-gradient(90deg, #1ecb6b 0%, #1ea7fd 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(30, 203, 107, 0.08);
+}
+.login-footer {
+  margin-top: 18px;
+  color: #8a94a6;
+  font-size: 1rem;
+  text-align: center;
+}
+.login-signup-link {
+  color: #1ea7fd;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.login-signup-link:hover {
+  text-decoration: underline;
+}
+.login-feature-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(30, 203, 107, 0.06);
+  padding: 24px 18px 18px 18px;
+  min-width: 220px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.login-feature-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.login-feature-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+.login-feature-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.login-feature-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.login-feature-value.blue { color: #1ea7fd; }
+.login-feature-value.green { color: #1ecb6b; }
+.login-feature-label {
+  color: #8a94a6;
+  font-size: 1.02rem;
+  font-weight: 500;
+}
+
+/* Responsive breakpoints */
+@media only screen and (max-width: 700px) {
+  .login-card, .login-feature-card {
+    max-width: 98vw;
+    padding: 24px 6px 18px 6px;
+  }
+  .login-header {
+    margin-top: 24px;
+    margin-bottom: 10px;
+  }
+  .login-back-home {
+    top: 16px;
+    right: 12px;
+    font-size: 0.98rem;
+  }
+  .login-feature-row {
+    gap: 12px;
+  }
+}
+@media only screen and (max-width: 400px) {
+  .login-card, .login-feature-card {
+    padding: 10px 2px 8px 2px;
+  }
+  .login-header {
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+} 

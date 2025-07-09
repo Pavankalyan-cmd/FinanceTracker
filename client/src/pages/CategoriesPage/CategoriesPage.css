@@ -1,0 +1,322 @@
+/* Base styles */
+.category-management-page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 0;
+  }
+  .category-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .category-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .category-header-actions {
+    display: flex;
+    gap: 12px;
+  }
+  .add-category-input {
+    min-width: 220px;
+    background: #f5f7fa;
+    border-radius: 8px;
+  }
+  .add-category-btn {
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    text-transform: none !important;
+    padding: 8px 24px !important;
+  }
+  
+  .category-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(30, 203, 107, 0.06);
+    padding: 24px 32px 28px 32px;
+    margin-bottom: 32px;
+  }
+  
+  /* Pending Review Section */
+  .pending-review-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .pending-warning-icon {
+    color: #f59e42;
+  }
+  .pending-title {
+    font-weight: 600;
+  }
+  .pending-count {
+    background: #f5f7fa;
+    border-radius: 8px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    padding: 2px 12px;
+    margin-left: 4px;
+    color: #222;
+  }
+  .pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pending-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f1f3;
+  }
+  .pending-row:last-child {
+    border-bottom: none;
+  }
+  .pending-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .pending-name {
+    font-size: 1.08rem;
+    font-weight: 600;
+  }
+  .pending-meta {
+    color: #8a94a6;
+    font-size: 0.98rem;
+  }
+  .pending-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .category-badge {
+    border-radius: 8px;
+    padding: 4px 14px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #222;
+    background: #f5f7fa;
+    display: inline-block;
+    min-width: 70px;
+    text-align: center;
+  }
+  .category-badge.orange { background: #fff4e5; color: #f59e42; }
+  .category-badge.green { background: #e8f9f0; color: #1ecb6b; }
+  .category-badge.purple { background: #f3eaff; color: #a259e6; }
+  .category-badge.blue { background: #eaf6ff; color: #1ea7fd; }
+  .category-badge.yellow { background: #fffbe5; color: #e6c200; }
+  .category-badge.pink { background: #ffeaf6; color: #e573b7; }
+  .category-badge.red { background: #fff0f0; color: #f44336; }
+  .approve-btn, .edit-btn {
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    padding: 4px 18px !important;
+    text-transform: none !important;
+    background: #fff !important;
+    border: 1.5px solid #d3e0ea !important;
+    color: #222 !important;
+  }
+  .approve-btn:hover {
+    background: #f5f7fa !important;
+    border-color: #1ecb6b !important;
+  }
+  .edit-btn:hover {
+    background: #f5f7fa !important;
+    border-color: #1ea7fd !important;
+  }
+  
+  /* AI Learning Performance */
+  .ai-learning-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .ai-learning-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .ai-learning-card {
+    background: #fafbfc;
+    border-radius: 12px;
+    padding: 18px 14px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+  }
+  .ai-learning-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .ai-learning-icon {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+  }
+  .ai-learning-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .percent-badge {
+    border-radius: 8px;
+    padding: 2px 10px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin-left: auto;
+    background: #f5f7fa;
+    color: #222;
+  }
+  .percent-badge.orange { background: #fff4e5; color: #f59e42; }
+  .percent-badge.green { background: #e8f9f0; color: #1ecb6b; }
+  .percent-badge.purple { background: #f3eaff; color: #a259e6; }
+  .percent-badge.blue { background: #eaf6ff; color: #1ea7fd; }
+  .percent-badge.yellow { background: #fffbe5; color: #e6c200; }
+  .percent-badge.pink { background: #ffeaf6; color: #e573b7; }
+  .percent-badge.red { background: #fff0f0; color: #f44336; }
+  .ai-learning-tx {
+    color: #8a94a6;
+    font-size: 0.98rem;
+    margin-bottom: 6px;
+  }
+  .ai-learning-bar {
+    width: 100%;
+    height: 8px !important;
+    border-radius: 6px;
+    background: #f0f1f3 !important;
+  }
+  
+  /* AI Training Insights */
+  .ai-training-insights-row {
+    display: flex;
+    gap: 32px;
+    margin-top: 8px;
+  }
+  .ai-training-insight-card {
+    background: #fafbfc;
+    border-radius: 12px;
+    flex: 1;
+    min-width: 0;
+    padding: 24px 12px 18px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ai-training-insight-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .ai-training-insight-label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #222;
+  }
+  .ai-training-insight-sub {
+    font-size: 0.98rem;
+    color: #8a94a6;
+    margin-top: 2px;
+  }
+  .ai-training-insight-card.green .ai-training-insight-value { color: #1ecb6b; }
+  .ai-training-insight-card.blue .ai-training-insight-value { color: #1ea7fd; }
+  .ai-training-insight-card.yellow .ai-training-insight-value { color: #e6c200; }
+  
+  /* Responsive breakpoints */
+  @media only screen and (max-width: 600px) {
+    .category-management-page {
+      padding: 12px 0;
+    }
+    .category-header-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .category-title {
+      font-size: 1.3rem;
+    }
+    .category-card {
+      padding: 12px 6px 14px 6px;
+      border-radius: 10px;
+    }
+    .pending-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 0;
+    }
+    .pending-actions {
+      gap: 6px;
+    }
+    .ai-learning-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .ai-training-insights-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ai-training-insight-card {
+      padding: 12px 4px 10px 4px;
+      border-radius: 8px;
+    }
+  }
+  @media only screen and (min-width: 600px) {
+    .category-management-page {
+      padding: 20px 0;
+    }
+    .ai-learning-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .ai-training-insights-row {
+      gap: 14px;
+    }
+  }
+  @media only screen and (min-width: 768px) {
+    .category-management-page {
+      padding: 28px 0;
+    }
+    .ai-learning-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .ai-training-insights-row {
+      gap: 18px;
+    }
+  }
+  @media only screen and (min-width: 992px) {
+    .category-management-page {
+      padding: 32px 0;
+    }
+    .ai-learning-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+    .ai-training-insights-row {
+      gap: 32px;
+    }
+  }
+  @media only screen and (min-width: 1200px) {
+    .category-management-page {
+      padding: 40px 0;
+    }
+    .ai-learning-grid {
+      gap: 24px;
+    }
+    .ai-training-insights-row {
+      gap: 40px;
+    }
+  }
+  
