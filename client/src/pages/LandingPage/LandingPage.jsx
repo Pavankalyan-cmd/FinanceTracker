@@ -1,5 +1,6 @@
 import React from "react";
 import "./LandingPage.css";
+import { useNavigate } from "react-router-dom"; // 👈 import navigate hook
 import Button from "@mui/material/Button";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
@@ -7,7 +8,17 @@ import WalletOutlinedIcon from "@mui/icons-material/WalletOutlined";
 import EmojiObjectsOutlinedIcon from "@mui/icons-material/EmojiObjectsOutlined";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 
-const LandingPage = ({ onLogin, onSignup }) => {
+const LandingPage = () => {
+  const navigate = useNavigate(); // 👈 initialize navigate
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const handleSignup = () => {
+    navigate("/signup");
+  };
+
   return (
     <div className="landing-root">
       <header className="landing-header">
@@ -18,18 +29,19 @@ const LandingPage = ({ onLogin, onSignup }) => {
           </span>
         </div>
         <div className="landing-header-actions">
-          <Button className="landing-login-btn" onClick={onLogin}>
+          <Button className="landing-login-btn" onClick={handleLogin}>
             Login
           </Button>
           <Button
             className="landing-getstarted-btn"
             variant="contained"
-            onClick={onSignup}
+            onClick={handleSignup}
           >
             Get Started
           </Button>
         </div>
       </header>
+
       <main className="landing-main">
         <section className="landing-hero">
           <h1 className="landing-hero-title">
@@ -43,11 +55,12 @@ const LandingPage = ({ onLogin, onSignup }) => {
           <Button
             className="landing-hero-btn"
             variant="contained"
-            onClick={onSignup}
+            onClick={handleSignup}
           >
             Start Your Journey
           </Button>
         </section>
+
         <section className="landing-summary-cards">
           <div className="landing-summary-card">
             <MonetizationOnOutlinedIcon className="summary-icon green" />
@@ -65,6 +78,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
             <div className="summary-label">Categories</div>
           </div>
         </section>
+
         <section className="landing-features">
           <h2 className="features-title">Powerful AI Features</h2>
           <p className="features-desc">
@@ -100,11 +114,13 @@ const LandingPage = ({ onLogin, onSignup }) => {
             className="features-upload-btn"
             variant="contained"
             startIcon={<CloudUploadOutlinedIcon />}
+            onClick={handleSignup}
           >
             Upload Your First Statement
           </Button>
         </section>
       </main>
+
       <footer className="landing-footer">
         © 2024 FinanceTracker. All rights reserved.
       </footer>

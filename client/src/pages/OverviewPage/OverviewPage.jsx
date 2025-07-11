@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect,useContext } from "react";
 import "./OverviewPage.css";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ClipLoader } from "react-spinners";
 import CountUp from "react-countup";
 import Confetti from "react-confetti";
+import { TransactionContext } from "../../context/TransactionContext";
 
 const OverviewPage = () => {
   const fileInputRef = useRef();
@@ -18,6 +19,8 @@ const OverviewPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const { notifyTransactionChange } = useContext(TransactionContext);
+
   const [summary, setSummary] = useState({
     totalBalance: 0,
     monthlySpending: 0,
@@ -119,6 +122,7 @@ const OverviewPage = () => {
 
       setTimeout(() => setShowConfetti(false), 4000);
       await fetchAndSetTransactions();
+      notifyTransactionChange(); 
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Upload failed: " + (err.message || "Unknown error"));

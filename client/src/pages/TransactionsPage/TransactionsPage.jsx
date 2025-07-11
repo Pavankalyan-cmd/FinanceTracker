@@ -139,7 +139,7 @@ const TransactionsPage = () => {
           <div className="transactions-header-row">
             <h2 className="transactions-title">{getHeadingTitle()}</h2>
             <div className="transactions-actions">
-              <Box sx={{ minWidth: 140, marginRight: 2 }}>
+              <Box sx={{ minWidth: 130, marginRight: 2 }}>
                 <FormControl fullWidth>
                   <InputLabel>Month</InputLabel>
                   <Select

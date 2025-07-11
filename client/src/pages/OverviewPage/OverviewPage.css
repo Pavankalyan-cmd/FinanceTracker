@@ -13,6 +13,7 @@
     gap: 32px;
     margin-bottom: 32px;
     justify-content: space-between;
+   
   }
   
   .summary-card {
@@ -25,6 +26,9 @@
     display: flex;
     align-items: center;
     height: 110px;
+    border: 1px solid gainsboro;
+    /* background: linear-gradient(to bottom right, #f3f4f6, #ffffff); */
+    box-shadow: 15px 15px 30px #a7a7a72d, -15px -15px 30px #ffffff28;
   }
   
   .summary-card-content {
@@ -60,7 +64,7 @@
   }
   .green-bg { background: #e8f9f0 !important; color: #1ecb6b !important; }
   .red-bg { background: #fff0f0 !important; color: #f44336 !important; }
-  .blue-bg { background: #eaf6ff !important; color: #1ea7fd !important; }
+  .blue-bg { background: #eaf6ff !important; color: #1976d2!important; }
   
   .upload-section {
     background: #fff;
@@ -71,6 +75,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    border: 1px solid gainsboro;
+
   }
   .upload-title {
     font-size: 1.3rem;
@@ -89,7 +95,8 @@
     border-radius: 16px;
     background: #fafbfc;
     width: 100%;
-    max-width: 520px;
+    /* max-width: 520px; */
+    width: 90%;
     min-height: 220px;
     display: flex;
     flex-direction: column;

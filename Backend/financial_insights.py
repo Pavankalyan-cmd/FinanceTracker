@@ -2,22 +2,10 @@ from fastapi import APIRouter, Request, Query, HTTPException
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from firebase_admin import auth
-from firebase_config import db
+from firebase_config import db,verify_firebase_token
 
 router = APIRouter()
 
-# Verify Firebase ID Token
-def verify_firebase_token(request: Request):
-    auth_header = request.headers.get("authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-    id_token = auth_header.split("Bearer ")[1]
-    try:
-        decoded = auth.verify_id_token(id_token)
-        return decoded["uid"]
-    except Exception as e:
-        print(f"Firebase token verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Invalid Firebase token")
 
 @router.get("/financial-insights")
 def get_financial_insights(request: Request, period: str = Query("monthly")):

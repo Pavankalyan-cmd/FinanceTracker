@@ -29,7 +29,7 @@
     min-width: 90px;
   }
   .insights-toggle-btn.active {
-    background: #1ea7fd !important;
+    background: #1976d2!important;
     color: #fff !important;
   }
   
@@ -45,6 +45,8 @@
     padding: 28px 32px 32px 32px;
     flex: 1;
     min-width: 0;
+    border: 1px solid gainsboro;
+
   }
   .spending-by-category {
     flex: 1.2;
@@ -55,6 +57,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    border: 1px solid gainsboro;
+
   }
   .insights-card-title {
     font-size: 1.2rem;

@@ -10,7 +10,8 @@ from financial_advice import router as financial_advice_router
 from financial_insights import router as financial_insights_router
 from pending_review import  router as review_router
 from update_category import router as update_category_router
-
+from goals import router as goals_router
+from financial_advice import router as financial_advice
 app = FastAPI()
 
 app.add_middleware(
@@ -24,6 +25,8 @@ app.include_router(financial_advice_router)
 app.include_router(financial_insights_router)
 app.include_router(review_router)
 app.include_router(update_category_router)
+app.include_router(goals_router,tags=["Goals"])
+app.include_router(financial_advice)
 
 #  Utility: Verify Firebase ID Token
 def verify_firebase_token(request: Request):

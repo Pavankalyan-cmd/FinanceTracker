@@ -1,21 +1,11 @@
 from fastapi import APIRouter, Request, HTTPException
 from firebase_admin import auth, firestore
 from typing import List
-
+from firebase_config import verify_firebase_token
 router = APIRouter()
 
 
-def verify_firebase_token(request: Request) -> str:
-    auth_header = request.headers.get("authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Unauthorized")
 
-    id_token = auth_header.split("Bearer ")[1]
-    try:
-        decoded_token = auth.verify_id_token(id_token)
-        return decoded_token["uid"]
-    except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 def get_pending_review_transactions(uid: str) -> List[dict]:

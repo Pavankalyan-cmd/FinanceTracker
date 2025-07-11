@@ -2,6 +2,7 @@ import os
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 from dotenv import load_dotenv
+from fastapi import  HTTPException, Request
 
 load_dotenv()
 
@@ -12,5 +13,21 @@ if not firebase_admin._apps:
     print(cred)
 
 db = firestore.client()
-print("✅ Firestore initialized:", db)
+print(" Firestore initialized:", db)
 
+
+
+
+def verify_firebase_token(request: Request):
+    auth_header = request.headers.get("authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    id_token = auth_header.split("Bearer ")[1]
+    try:
+        decoded = auth.verify_id_token(id_token)
+        print(id_token)
+        return decoded["uid"]
+    except Exception as e:
+        print(f" Firebase token verification failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid Firebase token")

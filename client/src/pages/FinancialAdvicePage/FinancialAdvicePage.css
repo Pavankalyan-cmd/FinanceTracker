@@ -1,7 +1,7 @@
 /* Base styles */
 .financial-advice-page {
-    width: 100%;
-    max-width: 900px;
+    width: 79%;
+
     margin: 0 auto;
     padding: 32px 0;
   }
@@ -23,13 +23,21 @@
     text-transform: none !important;
     padding: 8px 24px !important;
   }
-  
+  .insight-clean-card{
+    border: 0.5px solid  #8a94a6;
+    padding: 0 0 0  3%;
+    border-radius: 10px;
+    background-color: #ffffffb9;
+  }
   .advice-card {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(30, 203, 107, 0.06);
     padding: 24px 32px 28px 32px;
     margin-bottom: 32px;
+    width: 90%;
+    border: 1px solid gainsboro;
+
   }
   .advice-card-header {
     display: flex;
@@ -83,6 +91,7 @@
     margin-bottom: 2px;
   }
   .advice-insight-title {
+    display: flex;
     font-size: 1.08rem;
     font-weight: 600;
   }
@@ -120,7 +129,7 @@
     border-radius: 8px !important;
     font-size: 1rem !important;
     text-transform: none !important;
-    background: #1ea7fd !important;
+    background: #1976d2!important;
     color: #fff !important;
   }
   

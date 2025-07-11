@@ -41,7 +41,7 @@ const LoginPage = ({ onBack, onForgot, onSignup }) => {
 
   
     toast.success("Login successful!");
-    navigate("/dashboard"); // ✅ Redirect
+    navigate("/dashboard"); 
   };
 
   const handleAuthError = (error) => {

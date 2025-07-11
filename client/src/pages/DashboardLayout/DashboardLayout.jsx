@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./DashboardLayout.css";
-import TransactionsPage from "../TransactionsPage/TransactionsPage";
-import FinancialInsightsPage from "../FinancialInsightsPage/FinancialInsightsPage";
-import OverviewPage from "../OverviewPage/OverviewPage";
-import CategoriesPage from "../CategoriesPage/CategoriesPage";
-import FinancialAdvicePage from "../FinancialAdvicePage/FinancialAdvicePage";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // ✅ Only for auth check
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const navItems = [
   { label: "Overview" },
@@ -21,28 +16,28 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ Paths
   const labelToPath = {
-    Overview: "/overview",
-    Transactions: "/transactions",
-    Insights: "/financial-insights",
-    Categories: "/categories",
-    "Financial Advice": "/financial-advice",
+    Overview: "overview",
+    Transactions: "transactions",
+    Insights: "financial-insights",
+    Categories: "categories",
+    "Financial Advice": "financial-advice",
   };
 
   const pathToLabel = Object.fromEntries(
-    Object.entries(labelToPath).map(([label, path]) => [path, label])
+    Object.entries(labelToPath).map(([label, path]) => [
+      `/dashboard/${path}`,
+      label,
+    ])
   );
 
   useEffect(() => {
-    // ✅ Sync active tab with current path
     const currentPath = location.pathname.toLowerCase();
     const matchedLabel = pathToLabel[currentPath];
     if (matchedLabel) {
       setActive(matchedLabel);
     }
 
-    // ✅ Optional: Auth check only (no dispatch)
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -84,16 +79,8 @@ const DashboardLayout = () => {
       </nav>
 
       <main className="dashboard-content">
-        <Routes>
-          <Route path="/overview" element={<OverviewPage />} />
-          <Route path="/transactions" element={<TransactionsPage />} />
-          <Route
-            path="/financial-insights"
-            element={<FinancialInsightsPage />}
-          />
-          <Route path="/categories" element={<CategoriesPage />} />
-          <Route path="/financial-advice" element={<FinancialAdvicePage />} />
-        </Routes>
+        {/* 🔁 This renders the correct child page from /dashboard/* */}
+        <Outlet />
       </main>
     </div>
   );

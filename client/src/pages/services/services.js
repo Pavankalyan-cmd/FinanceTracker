@@ -192,3 +192,97 @@ export async function updateTransactionCategory(
 
   return await res.json();
 }
+
+
+
+
+// Fetch all goals (with progress)
+export async function fetchGoals() {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}/goals`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch goals");
+  const data = await res.json();
+  return data.goals;
+}
+
+//  Add a new goal
+export async function addGoal(goal) {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}/goals`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(goal),
+  });
+
+  if (!res.ok) throw new Error("Failed to add goal");
+  return await res.json(); // returns { message, goal_id }
+}
+
+//  Edit a goal
+export async function updateGoal(goalId, goal) {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}/goals/${goalId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(goal),
+  });
+
+  if (!res.ok) throw new Error("Failed to update goal");
+  return await res.json();
+}
+
+// xDelete a goal
+export async function deleteGoal(goalId) {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}/goals/${goalId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to delete goal");
+  return await res.json();
+}
+
+
+
+export async function fetchFinancialAdvice() {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+  const res = await fetch(`${API_BASE}/ai/financial-advice`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch AI financial advice");
+
+  const data = await res.json();
+
+  // ✅ No need to parse again — already an object
+  return data.advice_json;
+}

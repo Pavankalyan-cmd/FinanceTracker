@@ -9,10 +9,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1% !important;
+    padding: 1.5% !important;
     margin: 1% 6%;
     background: white;
-    position: sticky;
+    position: sticky !important;
+    border-radius: 20px;
   }
   
   .dashboard-title-group {
@@ -51,8 +52,10 @@
   .dashboard-nav {
     display: flex;
     gap: 32px;
-    padding: 1%;
+    padding: 1% 10%;
     background: #fafbfc;
+   
+
   }
   
   .nav-btn {
@@ -74,13 +77,14 @@
   }
   
   .nav-btn.active {
-    background: #1ea7fd;
+    background: #1976d2;
     color: #fff;
   }
   
   .dashboard-content {
-    padding: 32px 48px;
+    /* padding: 32px 48px; */
     background: #fafbfc ;
+    width: 100%;
 
   }
   
@@ -92,6 +96,7 @@
       flex-direction: column;
       align-items: flex-start;
       padding: 20px 12px 0 12px;
+
     }
     .dashboard-title {
       font-size: 1.3rem;
@@ -105,11 +110,7 @@
       padding: 10px 0;
       font-size: 1rem;
     }
-    .dashboard-nav {
-      flex-direction: column;
-      gap: 8px;
-      padding: 16px 0 0 0;
-    }
+
     .nav-btn {
       width: 100%;
       text-align: left;
@@ -126,12 +127,8 @@
     .dashboard-header {
       padding: 24px 24px 0 24px;
     }
-    .dashboard-nav {
-      padding-left: 24px;
-    }
-    .dashboard-content {
-      padding: 24px 24px;
-    }
+
+
   }
   
   /* Medium devices (landscape tablets, 768px and up) */
@@ -139,12 +136,8 @@
     .dashboard-header {
       padding: 32px 32px 0 32px;
     }
-    .dashboard-nav {
-      padding-left: 48px;
-    }
-    .dashboard-content {
-      padding: 32px 32px;
-    }
+
+
   }
   
   /* Large devices (laptops/desktops, 992px and up) */
@@ -152,12 +145,8 @@
     .dashboard-header {
       padding: 32px 48px 0 48px;
     }
-    .dashboard-nav {
-      padding-left: 80px;
-    }
-    .dashboard-content {
-      padding: 32px 48px;
-    }
+
+
   }
   
   /* Extra large devices (large laptops and desktops, 1200px and up) */
@@ -165,10 +154,6 @@
     .dashboard-header {
       padding: 40px 120px 0 120px;
     }
-    .dashboard-nav {
-      padding-left: 120px;
-    }
-    .dashboard-content {
-      padding: 40px 120px;
-    }
+
+
   } 
