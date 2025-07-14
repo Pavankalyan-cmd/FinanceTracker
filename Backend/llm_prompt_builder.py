@@ -102,13 +102,12 @@ def call_gemini_and_get_json(prompt: str):
     try:
         response = model.generate_content(prompt)
         content = response.text.strip()
-        print("\nGemini raw output:\n", content[:1000]) 
+
         content = sanitize_json_text(content)
         try:
             parsed = json.loads(content)
         except json.JSONDecodeError as e:
-            print("JSON decode error:", e)
-            print("Sanitized content:\n", content)
+
             return []
 
         if isinstance(parsed, dict) and "transactions" in parsed:

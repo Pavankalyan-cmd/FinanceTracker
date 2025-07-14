@@ -6,13 +6,13 @@ import google.generativeai as genai
 import json
 import re
 import os
-router = APIRouter()
+router = APIRouter(prefix="/ai", tags=["Financial Advice"])
 db = firestore.client()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-2.0-flash")
 
-@router.get("/ai/financial-advice")
+@router.post("/financial-advice/generate")
 def generate_financial_advice(request: Request):
     user_id = verify_firebase_token(request)
     if not user_id:
@@ -22,14 +22,11 @@ def generate_financial_advice(request: Request):
     txns_ref = db.collection("users").document(user_id).collection("transactions")
     txns = [doc.to_dict() for doc in txns_ref.stream()]
 
-   
-
-
     # Filter from Jan 1 to today
     jan1 = datetime(datetime.today().year, 1, 1)
     today = datetime.today()
     txns = [t for t in txns if "date" in t and datetime.strptime(t["date"], "%Y-%m-%d") >= jan1]
-    print("transactions till today from jan1",txns)
+
 
     # Filter and calculate totals
     income = sum(t["amount"] for t in txns if t["category"] == "Salary")
@@ -47,7 +44,7 @@ def generate_financial_advice(request: Request):
     month_expenses = sum(t["amount"] for t in month_txns if t["type"] == "debit")
     month_savings = month_income - month_expenses
     month_savings_rate = round((month_savings / month_income) * 100, 2) if month_income else 0
-    print("monthly savings rate ",month_savings_rate)
+
     # Fetch goals
     goals_ref = db.collection("users").document(user_id).collection("goals")
     goals_docs = goals_ref.stream()
@@ -262,12 +259,37 @@ This Month's Performance:
         advice_text = res.text.strip()
         advice_text = re.sub(r"^```json|```$", "", advice_text).strip()
         advice = json.loads(advice_text)
-        print("advice from backend ",advice)
+
+        db.collection("users").document(user_id).collection("advice").document("latest").set({
+        "insights": advice.get("insights", []),
+        "monthly_health": advice.get("monthly_health", {}),
+        "updated_at": datetime.utcnow().isoformat()
+    })
+
         return {"success": True, "advice_json": advice}
 
     except json.JSONDecodeError as e:
-        print("Gemini response was not valid JSON:\n", res.text)
+
         raise HTTPException(status_code=500, detail=f"Gemini response was not valid JSON: {e}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+
+
+
+@router.get("/financial-advice")
+def get_financial_advice(request: Request):
+    user_id = verify_firebase_token(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    doc = db.collection("users").document(user_id).collection("advice").document("latest").get()
+    if doc.exists:
+        return doc.to_dict()
+    else:
+        return {
+            "insights": [],
+            "monthly_health": {},
+            "updated_at": None
+        }

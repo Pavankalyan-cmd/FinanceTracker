@@ -30,6 +30,12 @@ const DashboardLayout = () => {
       label,
     ])
   );
+  const handleLayoutUploadClick = () => {
+    navigate("/dashboard/overview");
+    setTimeout(() => {
+      window.dispatchEvent(new Event("trigger-upload"));
+    }, 300); // Give OverviewPage time to mount
+  };
 
   useEffect(() => {
     const currentPath = location.pathname.toLowerCase();
@@ -63,7 +69,9 @@ const DashboardLayout = () => {
             AI-powered personal finance management
           </p>
         </div>
-        <button className="upload-btn">Upload Statement</button>
+        <button className="upload-btn" onClick={handleLayoutUploadClick}>
+          Upload Statement
+        </button>
       </header>
 
       <nav className="dashboard-nav">

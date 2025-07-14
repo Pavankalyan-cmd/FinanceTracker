@@ -40,6 +40,8 @@ const FinancialGoalsCard = () => {
     try {
       const data = await fetchGoals();
       setGoals(data);
+      console.log("goal data at goal card", data);
+
     } catch (err) {
       console.error("Error loading goals:", err);
     }
@@ -123,9 +125,7 @@ const FinancialGoalsCard = () => {
         {goals.map((goal, idx) => {
           const percent = Math.min(
             100,
-            Math.round(
-              ((goal.manual_allocated || 0) / goal.target_amount) * 100
-            )
+            Math.round(((goal.allocated || 0) / goal.target_amount) * 100)
           );
           return (
             <div className="advice-goal-col" key={goal.id || idx} style={{}}>
@@ -150,16 +150,31 @@ const FinancialGoalsCard = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   width: "100%",
-                  margin:"1%"
+                  margin: "1%",
                 }}
               >
                 <div>
-                  ₹{(goal.manual_allocated || 0).toLocaleString()} of ₹
+                  ₹{(goal.allocated || 0).toLocaleString()} of ₹
                   {goal.target_amount.toLocaleString()}
                 </div>
                 <div> Deadline: {goal.deadline}</div>
               </div>
-       
+              {goal.months_left != null &&
+                goal.required_monthly_saving != null && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#666",
+                      marginBottom: "4px",
+                      textAlign: "left",
+                      width: "100%",
+                    }}
+                  >
+                    {goal.months_left} months left — Save ₹
+                    {goal.required_monthly_saving.toLocaleString()} / month
+                  </div>
+                )}
+
               <div className="advice-goal-actions">
                 <IconButton onClick={() => handleOpenForm(goal)}>
                   <EditIcon />

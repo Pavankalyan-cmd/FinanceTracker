@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef,useEffect, useState } from "react";
 import "./FinancialInsightsPage.css";
 import { Button, ButtonGroup, CircularProgress, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -14,6 +14,7 @@ const FinancialInsightsPage = () => {
   const [spendingTrends, setSpendingTrends] = useState({});
   const [healthScore3, setHealthScore3] = useState(null);
   const [healthScore6, setHealthScore6] = useState(null);
+  const hasFetched = useRef(false);
 
   const healthScoreData =
     scoreDuration === "6 Month" ? healthScore6 : healthScore3;
@@ -25,10 +26,12 @@ const FinancialInsightsPage = () => {
       ? "Good"
       : "Fair";
 
-  useEffect(() => {
-    loadInsights(period.toLowerCase());
-  }, [period]);
-
+    useEffect(() => {
+        if (!hasFetched.current) {
+          hasFetched.current = true;
+          loadInsights(period.toLowerCase());
+        }
+      }, [period]);
   const loadInsights = async (selectedPeriod) => {
     setLoading(true);
     try {
@@ -65,7 +68,6 @@ const FinancialInsightsPage = () => {
 
       {/* Category Summary + Health Score */}
       <div className="insights-main-row">
-        {/* Category Summary */}
         <div className="insights-card spending-by-category">
           <div className="insights-card-title">
             Spending by Category
@@ -73,42 +75,113 @@ const FinancialInsightsPage = () => {
               <InfoOutlinedIcon fontSize="small" />
             </Tooltip>
           </div>
+
+          {/* Bar Legend */}
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              fontSize: "12px",
+              marginBottom: "10px",
+              marginTop: "6px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <div
+                style={{
+                  width: 10,
+                  height: 10,
+                  background: "#1976d2",
+                  borderRadius: "2px",
+                }}
+              ></div>
+              <span>Actual</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <div
+                style={{
+                  width: 10,
+                  height: 10,
+                  background: "red",
+                  borderRadius: "2px",
+                }}
+              ></div>
+              <span>Increase</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <div
+                style={{
+                  width: 10,
+                  height: 10,
+                  background: "#1ecb6b",
+                  borderRadius: "2px",
+                }}
+              ></div>
+              <span>Decrease</span>
+            </div>
+          </div>
+
           {loading ? (
             <div>Loading...</div>
           ) : categorySummary.length ? (
-            categorySummary.map((cat) => (
-              <div className="spending-category-row" key={cat.name}>
-                <div className="spending-category-label">{cat.name}</div>
-                <div className="spending-category-amount">
-                  ₹{cat.amount?.toFixed(2) || "0.00"}
-                </div>
+            categorySummary.map((cat) => {
+              const actual = Math.min(cat.percent, 100);
+              const change = Math.min(Math.abs(cat.change), 100 - actual);
+              const isDecrease = parseFloat(cat.change) < 0;
+
+              return (
                 <div
-                  className={`spending-category-percent ${
-                    parseFloat(cat.change) < 0 ? "green" : "red"
-                  }`}
+                  className="spending-category-row"
+                  key={cat.name}
+                  style={{ marginBottom: "14px" }}
                 >
-                  {cat.change > 0 ? "+" : ""}
-                  {cat.change}%
-                </div>
-                <div className="spending-category-bar-wrapper">
+                  <div className="spending-category-label">{cat.name}</div>
+                  <div className="spending-category-amount">
+                    ₹{cat.amount?.toFixed(2) || "0.00"}
+                  </div>
                   <div
-                    style={{
-                      width: `${cat.percent}%`,
-                      backgroundColor: "#1976d2",
-                      height: "8px",
-                    }}
-                  />
+                    className={`spending-category-percent ${
+                      isDecrease ? "green" : "red"
+                    }`}
+                  >
+                    {cat.change > 0 ? "+" : ""}
+                    {cat.change}%
+                  </div>
+
+                  {/* Multi-color bar */}
                   <div
+                    className="spending-category-bar-wrapper"
                     style={{
-                      width: `${Math.abs(cat.change)}%`,
-                      backgroundColor:
-                        parseFloat(cat.change) < 0 ? "#1ecb6b" : "red",
+                      display: "flex",
                       height: "8px",
+                      width: "100%",
+                      background: "#eee",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                      marginTop: "6px",
                     }}
-                  />
+                  >
+                    {/* Actual % - Blue */}
+                    <div
+                      style={{
+                        width: `${cat.percent}%`,
+                        backgroundColor: "#1976d2",
+                      }}
+                    />
+
+                    {/* Change % - Red or Green */}
+                    {Math.abs(cat.change) > 0 && (
+                      <div
+                        style={{
+                          width: `${Math.abs(cat.change)}%`,
+                          backgroundColor: isDecrease ? "#1ecb6b" : "red",
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div>No spending data</div>
           )}

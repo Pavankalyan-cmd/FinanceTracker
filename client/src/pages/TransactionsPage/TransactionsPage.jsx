@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import "./TransactionsPage.css";
 import {
   Table,
@@ -50,6 +50,8 @@ const TransactionsPage = () => {
   const [month, setMonth] = useState("");
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
+  
 
   useEffect(() => {
     const loadData = async () => {
@@ -66,9 +68,12 @@ const TransactionsPage = () => {
         setLoading(false);
       }
     };
-    loadData();
-  }, []);
 
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      loadData();
+    }
+  }, []);
   const handleFilter = () => {
     let filtered = [...transactions];
 

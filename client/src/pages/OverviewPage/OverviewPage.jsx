@@ -1,25 +1,29 @@
-import React, { useRef, useState, useEffect,useContext } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import "./OverviewPage.css";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import WalletIcon from "@mui/icons-material/Wallet";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
-import { uploadBankStatement, fetchTransactions } from "../services/services";
+import { uploadBankStatement, fetchTransactions,generateFinancialAdvice } from "../services/services";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ClipLoader } from "react-spinners";
 import CountUp from "react-countup";
 import Confetti from "react-confetti";
-import { TransactionContext } from "../../context/TransactionContext";
+import { Switch, FormControlLabel, Tooltip } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const OverviewPage = () => {
   const fileInputRef = useRef();
+  const hasFetched = useRef(false);
+  const shouldTriggerUpload = useRef(false); 
+  const [skipContinuityCheck, setSkipContinuityCheck] = useState(false);
+
 
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const { notifyTransactionChange } = useContext(TransactionContext);
 
   const [summary, setSummary] = useState({
     totalBalance: 0,
@@ -32,9 +36,31 @@ const OverviewPage = () => {
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    fetchAndSetTransactions();
+    const triggerUploadListener = () => {
+      shouldTriggerUpload.current = true;
+    };
+
+    window.addEventListener("trigger-upload", triggerUploadListener);
+    return () => {
+      window.removeEventListener("trigger-upload", triggerUploadListener);
+    };
   }, []);
 
+  // ✅ Check when loading completes to trigger file input
+  useEffect(() => {
+    if (!loading && shouldTriggerUpload.current && fileInputRef.current) {
+      fileInputRef.current.click();
+      shouldTriggerUpload.current = false;
+    }
+  }, [loading]);
+
+  // ✅ Your existing fetch logic
+  useEffect(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchAndSetTransactions();
+    }
+  }, []);
   const fetchAndSetTransactions = async () => {
     try {
       setLoading(true);
@@ -42,12 +68,12 @@ const OverviewPage = () => {
       setTransactions(txs);
       computeSummary(txs);
     } catch (err) {
-      console.error("Failed to fetch transactions:", err);
       toast.error("Failed to load transactions");
     } finally {
       setLoading(false);
     }
   };
+
 
   const computeSummary = (transactions) => {
     let creditTotal = 0;
@@ -116,13 +142,27 @@ const OverviewPage = () => {
         await new Promise((res) => setTimeout(res, 1000)); // simulate delay
       }
 
-      const result = await uploadBankStatement(file, password);
+      const result = await uploadBankStatement(
+        file,
+        password,
+        !skipContinuityCheck
+      );
+      if (result.status === "error") {
+        const warning =
+          result.warning || "Upload rejected due to statement issues.";
+        toast.warning(warning);
+        return;
+      }
+      console.log("Upload API result:", result);
+
+      
       toast.success(`${result.data.length} transactions uploaded`);
       setShowConfetti(true);
 
       setTimeout(() => setShowConfetti(false), 4000);
       await fetchAndSetTransactions();
-      notifyTransactionChange(); 
+      await generateFinancialAdvice();
+      toast.info("AI financial advice updated");
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Upload failed: " + (err.message || "Unknown error"));
@@ -162,7 +202,7 @@ const OverviewPage = () => {
                   </div>
                 </div>
                 <div className="summary-icon green-bg">
-                  <AttachMoneyIcon fontSize="large" />
+                  <CurrencyRupeeIcon fontSize="large" />
                 </div>
               </div>
             </div>
@@ -242,6 +282,29 @@ const OverviewPage = () => {
                 style={{ display: "none" }}
                 onChange={handleFileChange}
               />
+            </div>
+            <div
+              style={{
+                marginTop: "1rem",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={skipContinuityCheck}
+                    onChange={(e) => setSkipContinuityCheck(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Skip continuity check"
+              />
+              <Tooltip title="Enable this if your bank statements are not in consecutive months. If disabled, uploads may be rejected for gaps.">
+                <InfoOutlinedIcon
+                  style={{ cursor: "pointer", color: "#888" }}
+                />
+              </Tooltip>
             </div>
           </div>
 

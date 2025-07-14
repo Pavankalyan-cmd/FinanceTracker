@@ -4,6 +4,7 @@ from uuid import uuid4
 from firebase_admin import firestore
 from datetime import datetime
 from firebase_config import verify_firebase_token
+from collections import defaultdict
 
 router = APIRouter()
 db = firestore.client()
@@ -60,10 +61,6 @@ def delete_goal(goal_id: str, request: Request):
 
 
 
-
-
-
-
 def calculate_months_left(deadline_str):
     today = datetime.today()
     deadline = datetime.strptime(deadline_str, "%Y-%m-%d")
@@ -84,21 +81,28 @@ def get_goals_with_progress(request: Request):
     if not goals:
         return {"goals": []}
 
-    # Fetch transactions
-    txn_ref = db.collection("users").document(user_id).collection("transactions")
-    txns = [doc.to_dict() for doc in txn_ref.stream()]
-    income = sum(txn["amount"] for txn in txns if txn["type"] == "credit")
-    expenses = sum(txn["amount"] for txn in txns if txn["type"] == "debit")
-    total_savings = income - expenses
+    # Fetch all goal contributions
+    contrib_ref = db.collection("users").document(user_id).collection("goal_contributions")
+    contrib_docs = contrib_ref.stream()
 
-    # Total target (for proportional allocation)
-    total_goal_target = sum(goal["target_amount"] for goal in goals)
+    goal_contrib_totals = defaultdict(float)
+    for doc in contrib_docs:
+        data = doc.to_dict()
+        goal_id = data.get("goal_id")
+        amount = data.get("allocated", 0)
+        if goal_id:
+            goal_contrib_totals[goal_id] += amount
 
     # Enhance goals with progress data
     enhanced_goals = []
     for goal in goals:
-        share = goal["target_amount"] / total_goal_target if total_goal_target else 0
-        allocated = goal.get("manual_allocated") or round(total_savings * share)
+        # Fetch monthly auto allocations for this goal
+        contrib_ref = db.collection("users").document(user_id).collection("goal_contributions")
+        contribs = contrib_ref.where("goal_id", "==", goal["id"]).stream()
+        auto_alloc_total = sum(doc.to_dict().get("allocated", 0) for doc in contribs)
+
+        manual_alloc = goal.get("manual_allocated") or 0
+        allocated = manual_alloc + auto_alloc_total
         remaining = goal["target_amount"] - allocated
         progress_percent = round((allocated / goal["target_amount"]) * 100, 2) if goal["target_amount"] > 0 else 0
         months_left = calculate_months_left(goal["deadline"])
@@ -113,4 +117,87 @@ def get_goals_with_progress(request: Request):
             "required_monthly_saving": required_monthly
         })
 
+
     return {"goals": enhanced_goals}
+
+
+def calculate_monthly_savings(transactions):
+    monthly = defaultdict(lambda: {"credit": 0, "debit": 0})
+    for txn in transactions:
+        try:
+            month = txn["date"][:7]  # e.g. "2024-06"
+            if txn["category"] == "Salary":
+                monthly[month]["credit"] += txn["amount"]
+            elif txn["type"] == "debit":
+                monthly[month]["debit"] += txn["amount"]
+        except:
+            continue
+
+    return {
+        month: credit_debit["credit"] - credit_debit["debit"]
+        for month, credit_debit in monthly.items()
+    }
+
+
+
+
+def auto_allocate_to_goals(user_id: str, savings_by_month: dict):
+    db = firestore.client()
+    print("savings ",savings_by_month)
+    print("received user id :", user_id)
+    # Fetch active goals
+    goals_ref = db.collection("users").document(user_id).collection("goals")
+    goals_docs = goals_ref.stream()
+    goals = [doc.to_dict() | {"id": doc.id} for doc in goals_docs]
+
+    if not goals:
+        print(f"No goals found for user {user_id}. Skipping allocation.")
+        return
+
+    all_allocations = []
+
+    for month, savings in savings_by_month.items():
+        if savings <= 0:
+            print(f"Skipping auto allocation for {month} due to negative or zero savings")
+            continue
+
+        # Calculate total manual allocation
+        manual_alloc_total = sum(goal.get("manual_allocated", 0) or 0 for goal in goals)
+
+        # Cap manual allocations to available savings
+        capped_manual_alloc = min(manual_alloc_total, savings)
+        leftover_savings = savings - capped_manual_alloc
+
+        # Calculate proportional targets for remaining savings
+        auto_goals = [g for g in goals if not g.get("manual_allocated")]
+        total_auto_target = sum(g["target_amount"] for g in auto_goals)
+
+        # Prepare allocations
+        allocations = []
+        for goal in goals:
+            alloc = 0
+            if goal.get("manual_allocated"):
+                alloc = min(goal["manual_allocated"], savings)
+            else:
+                share = goal["target_amount"] / total_auto_target if total_auto_target else 0
+                alloc = round(leftover_savings * share)
+
+            record = {
+                "goal_id": goal["id"],
+                "allocated": alloc,
+                "month": month,
+                "source": "auto",
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+            allocations.append(record)
+
+        # Save to goal_contributions collection
+        for record in allocations:
+            contrib_id = f"{record['goal_id']}_{month}"
+            db.collection("users") \
+            .document(user_id) \
+            .collection("goal_contributions") \
+            .document(contrib_id).set(record)
+
+        all_allocations.extend(allocations)
+        print(allocations, "are added")

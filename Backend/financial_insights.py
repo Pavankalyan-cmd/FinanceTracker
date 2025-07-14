@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Query, HTTPException
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from firebase_admin import auth
 from firebase_config import db,verify_firebase_token
 
 router = APIRouter()

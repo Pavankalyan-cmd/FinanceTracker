@@ -1,17 +1,21 @@
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException, Request
 from firebase_admin import auth
-from firebase_config import db
-from extract_and_group import extract_text_with_pdfplumber, group_transactions_from_lines
+from firebase_config import db,verify_firebase_token
+from extract_and_group import extract_text_with_pdfplumber, group_transactions_from_lines,extract_months_from_raw_blocks
 from llm_prompt_builder import build_prompt_with_rules, call_gemini_and_get_json
 from uuid import uuid4
 from fastapi.middleware.cors import CORSMiddleware
-
+from goals import auto_allocate_to_goals,calculate_monthly_savings
 from financial_advice import router as financial_advice_router
 from financial_insights import router as financial_insights_router
 from pending_review import  router as review_router
 from update_category import router as update_category_router
 from goals import router as goals_router
-from financial_advice import router as financial_advice
+from datetime import datetime
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 app.add_middleware(
@@ -21,28 +25,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(financial_advice_router)
 app.include_router(financial_insights_router)
 app.include_router(review_router)
 app.include_router(update_category_router)
-app.include_router(goals_router,tags=["Goals"])
-app.include_router(financial_advice)
+app.include_router(goals_router, tags=["Goals"])
+
 
 #  Utility: Verify Firebase ID Token
-def verify_firebase_token(request: Request):
-    auth_header = request.headers.get("authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
 
-    id_token = auth_header.split("Bearer ")[1]
-    try:
-        decoded = auth.verify_id_token(id_token)
-        print(id_token)
-        return decoded["uid"]
-    except Exception as e:
-        print(f" Firebase token verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Invalid Firebase token")
+# def verify_firebase_token(request: Request):
+#     auth_header = request.headers.get("authorization")
+#     if not auth_header or not auth_header.startswith("Bearer "):
+#         raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+#     id_token = auth_header.split("Bearer ")[1]
+#     try:
+#         decoded = auth.verify_id_token(id_token)
+
+#         return decoded["uid"]
+#     except Exception as e:
+  
+#         raise HTTPException(status_code=401, detail="Invalid Firebase token")
     
+
 def match_transaction(tx, learning_map, tolerance=10):
     tx_title = tx["title"].lower().strip()
     tx_amount = int(tx["amount"])
@@ -59,15 +66,18 @@ def match_transaction(tx, learning_map, tolerance=10):
             continue
     return None    
 
+
+
+
+
 #  Upload Endpoint
 @app.post("/upload-bank-statement-cot")
 async def upload_bank_statement_with_llm(
     request: Request,
     file: UploadFile = File(...),
-    password: str = Form(None)
+    password: str = Form(None),
+    check_continuity: bool = Form(True) 
 ):
-    print(f" Received file: {file.filename}")
-    print(f"Received password: {password}")
 
     uid = verify_firebase_token(request)
 
@@ -77,14 +87,71 @@ async def upload_bank_statement_with_llm(
         transaction_blocks = group_transactions_from_lines(raw_text)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"PDF extraction failed: {str(e)}")
+    print(transaction_blocks)
+    
 
-    print(f"Grouped {len(transaction_blocks)} raw transaction blocks")
+    #  Early check for continuity using extracted months
+    uploaded_months = extract_months_from_raw_blocks(transaction_blocks)
+    # Fetch existing transaction months
+    user_tx_ref = db.collection("users").document(uid).collection("transactions")
+    docs = user_tx_ref.stream()
+    print("transactions at backend to check ",docs)
+    existing_months = set()
+    if not uploaded_months:
+        return {
+        "status": "error",
+        "warning": "No valid transaction months were detected from this statement. Please upload a valid or clearer PDF.",
+        "raw_months_detected": []
+    }
+
+    for doc in docs:
+        try:
+            tx = doc.to_dict()
+            print("transaction at backend",tx)
+            dt = datetime.strptime(tx["date"], "%Y-%m-%d")
+            existing_months.add(dt.strftime("%Y-%m"))
+        except:
+            continue
+    duplicate_months = [m for m in uploaded_months if m in existing_months]
+
+    if duplicate_months:
+            return {
+                "status": "error",
+                "warning": f"Duplicate month(s) detected: {', '.join(duplicate_months)}. You have already uploaded these.",
+                "raw_months_detected": uploaded_months
+            }
+
+    
+    missing_months = []
+
+    if check_continuity:
+        # Combine uploaded + existing to check continuity
+        all_months = sorted(existing_months.union(set(uploaded_months)))
+        all_dts = [datetime.strptime(m, "%Y-%m") for m in all_months]
+        all_dts.sort()
+
+        expected = []
+        current = all_dts[0]
+        end = all_dts[-1]
+        while current < end:
+            current = current.replace(day=1)
+            current = datetime(current.year + (current.month // 12), (current.month % 12) + 1, 1)
+            expected.append(current.strftime("%Y-%m"))
+
+        missing_months = [m for m in expected if m not in uploaded_months and m not in existing_months]
+
+    if missing_months:
+            return {
+                "status": "error",
+                "warning": f"Missing month(s): {', '.join(missing_months)}. Please upload them before proceeding.",
+                "raw_months_detected": uploaded_months
+            }
+    # Final check
+
 
     prompt = build_prompt_with_rules(transaction_blocks)
     transactions = call_gemini_and_get_json(prompt)
 
-    print(f"Gemini returned {len(transactions)} transactions")
-    print(f"Parsed {len(transactions)} transactions")
 
     # Load user's saved category learning
     learning_ref = db.collection("users").document(uid).collection("category_learning")
@@ -113,18 +180,26 @@ async def upload_bank_statement_with_llm(
             tx["id"] = str(uuid4())
             tx["user"] = uid
 
+     
             db.collection("users").document(uid).collection("transactions").document(tx["id"]).set(tx)
-            print(f" Uploaded transaction {tx['id']}")
+
             success_count += 1
+ 
         except Exception as e:
             print(f" Failed to upload: {tx}")
             print(f"Error: {e}")
-
-    print(f" Finished uploading {success_count}/{len(transactions)} transactions for user {uid}")
+    savings_by_month=calculate_monthly_savings(transactions)
+    print("saving by month ",savings_by_month)
+    auto_allocate_to_goals(uid,savings_by_month)           
     return {
         "message": f"{success_count} transactions uploaded",
         "data": transactions
     }
+
+
+
+
+
 
 # Fetch Endpoint
 @app.get("/transactions")
@@ -135,9 +210,11 @@ async def get_user_transactions(request: Request):
         docs = user_tx_ref.stream()
 
         transactions = [doc.to_dict() for doc in docs]
-        print(f" Fetched {len(transactions)} transactions for user {uid}")
+
         return {"transactions": transactions, "count": len(transactions)}
     
     except Exception as e:
-        print(f" Error fetching transactions: {e}")
+
         raise HTTPException(status_code=500, detail="Failed to fetch transactions")
+
+

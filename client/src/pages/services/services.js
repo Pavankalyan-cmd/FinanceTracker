@@ -2,8 +2,11 @@ import { getAuth } from "firebase/auth";
 import axios from "axios";
 
 const API_BASE = "http://localhost:8000"; // or your deployed backend URL
-
-export async function uploadBankStatement(file, password = "") {
+export async function uploadBankStatement(
+  file,
+  password = "",
+  checkContinuity = true
+) {
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -14,20 +17,15 @@ export async function uploadBankStatement(file, password = "") {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("password", password);
-  console.log("Uploading file:", file);
+  formData.append("check_continuity", checkContinuity.toString()); // <-- Add this
 
-  console.log(password)
-  console.log(idToken)
-  const response = await fetch(
-    `${API_BASE}/upload-bank-statement-cot`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },
-      body: formData,
-    }
-  );
+  const response = await fetch(`${API_BASE}/upload-bank-statement-cot`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: formData,
+  });
 
   const data = await response.json();
   if (!response.ok) {
@@ -40,6 +38,7 @@ export async function uploadBankStatement(file, password = "") {
 export async function fetchTransactions() {
   const auth = getAuth();
   const user = auth.currentUser;
+  
 
   if (!user) throw new Error("User not authenticated");
 
@@ -59,41 +58,6 @@ export async function fetchTransactions() {
   const data = await res.json();
   return data.transactions; 
 }
-
-
-
-// export const fetchFinancialAdviceAPI = async (transactions) => {
-//   const auth = getAuth();
-//   const user = auth.currentUser;
-
-//   if (!user) throw new Error("User not authenticated");
-
-//   const idToken = await user.getIdToken();
-
-//   const res = await fetch("http://localhost:8000/ai/financial-advice", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${idToken}`, // 🔐 Secure with Firebase auth
-//     },
-//     body: JSON.stringify({ transactions }),
-//   });
-
-//   if (!res.ok) {
-//     const error = await res.json();
-//     throw new Error(error.detail || "Failed to fetch AI financial advice");
-//   }
-
-//   const data = await res.json();
-//   return data;
-// };
-
-
-
-
-// Base URL for your FastAPI backend
-
-
 
 
 
@@ -120,13 +84,13 @@ export async function fetchFinancialInsights(period = "Monthly") {
   if (!response.ok) {
     throw new Error(data.detail || "Failed to fetch insights");
   }
-
+  console.log(data)
   return data;
 }
 
 
 
-// services.js
+
 
 export async function fetchPendingReviewTransactions() {
   const auth = getAuth();
@@ -153,10 +117,7 @@ export async function fetchPendingReviewTransactions() {
 
 
 
-
-
-
-// ✏️ Update a transaction's category + store learning
+// Update a transaction's category + store learning
 export async function updateTransactionCategory(
   transactionId,
   newCategory,
@@ -249,7 +210,7 @@ export async function updateGoal(goalId, goal) {
   return await res.json();
 }
 
-// xDelete a goal
+// Delete a goal
 export async function deleteGoal(goalId) {
   const user = getAuth().currentUser;
   if (!user) throw new Error("User not authenticated");
@@ -267,7 +228,6 @@ export async function deleteGoal(goalId) {
 }
 
 
-
 export async function fetchFinancialAdvice() {
   const user = getAuth().currentUser;
   if (!user) throw new Error("User not authenticated");
@@ -283,6 +243,26 @@ export async function fetchFinancialAdvice() {
 
   const data = await res.json();
 
-  // ✅ No need to parse again — already an object
+  // ✅ Return directly, since data already has `insights`, `monthly_health`, `updated_at`
+  return data;
+}
+export async function generateFinancialAdvice() {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+
+  const res = await fetch(`${API_BASE}/ai/financial-advice/generate`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to generate AI financial advice");
+
+  const data = await res.json();
+
+  // ✅ This endpoint returns { success: true, advice_json: {...} }
   return data.advice_json;
 }

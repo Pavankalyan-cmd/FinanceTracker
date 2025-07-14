@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef,useState, useEffect } from "react";
 import "./CategoriesPage.css";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
@@ -51,11 +51,15 @@ const CategoriesPage = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [successIndex, setSuccessIndex] = useState(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    fetchPendingReviewTransactions()
-      .then(setPendingTransactions)
-      .catch(console.error);
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchPendingReviewTransactions()
+        .then(setPendingTransactions)
+        .catch(console.error);
+    }
   }, []);
 
   const handleEdit = (index) => {

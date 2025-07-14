@@ -10,10 +10,10 @@ cred_path = os.getenv("FIREBASE_CREDENTIAL_PATH")
 if not firebase_admin._apps:
     cred = credentials.Certificate(cred_path)
     firebase_admin.initialize_app(cred)
-    print(cred)
+
 
 db = firestore.client()
-print(" Firestore initialized:", db)
+
 
 
 
@@ -26,8 +26,8 @@ def verify_firebase_token(request: Request):
     id_token = auth_header.split("Bearer ")[1]
     try:
         decoded = auth.verify_id_token(id_token)
-        print(id_token)
+
         return decoded["uid"]
     except Exception as e:
-        print(f" Firebase token verification failed: {e}")
+
         raise HTTPException(status_code=401, detail="Invalid Firebase token")
