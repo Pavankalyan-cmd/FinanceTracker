@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useRef} from "react";
 import {
   Button,
   IconButton,
@@ -25,6 +25,8 @@ const FinancialGoalsCard = () => {
   const [goals, setGoals] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
+  const hasFetched = useRef(false);
+  
   const [formData, setFormData] = useState({
     name: "",
     target_amount: "",
@@ -33,17 +35,20 @@ const FinancialGoalsCard = () => {
   });
 
   useEffect(() => {
-    loadGoals();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      loadGoals();
+    }  
   }, []);
 
   const loadGoals = async () => {
     try {
       const data = await fetchGoals();
       setGoals(data);
-      console.log("goal data at goal card", data);
+
 
     } catch (err) {
-      console.error("Error loading goals:", err);
+
     }
   };
 

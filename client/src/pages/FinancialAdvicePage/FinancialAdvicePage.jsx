@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+
 import {
   fetchFinancialAdvice,
   generateFinancialAdvice,
@@ -142,7 +143,7 @@ const FinancialAdvicePage = () => {
 
       {healthStats.length > 0 && (
         <div className="advice-card advice-health-card">
-          <h3>This Month's Financial Health</h3>
+          <h3>Last Month's Financial Health</h3>
           <div className="advice-health-row">
             {healthStats.map((stat, idx) => (
               <Tooltip title={stat.tooltip} key={idx} arrow>

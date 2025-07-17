@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8000"; // or your deployed backend URL
+const API_BASE = process.env.REACT_APP_BASE_URL; 
 export async function uploadBankStatement(
   file,
   password = "",
@@ -17,7 +17,7 @@ export async function uploadBankStatement(
   const formData = new FormData();
   formData.append("file", file);
   formData.append("password", password);
-  formData.append("check_continuity", checkContinuity.toString()); // <-- Add this
+  formData.append("check_continuity", checkContinuity.toString()); 
 
   const response = await fetch(`${API_BASE}/upload-bank-statement-cot`, {
     method: "POST",
@@ -84,7 +84,7 @@ export async function fetchFinancialInsights(period = "Monthly") {
   if (!response.ok) {
     throw new Error(data.detail || "Failed to fetch insights");
   }
-  console.log(data)
+
   return data;
 }
 
@@ -163,6 +163,7 @@ export async function fetchGoals() {
   if (!user) throw new Error("User not authenticated");
 
   const token = await user.getIdToken();
+
   const res = await fetch(`${API_BASE}/goals`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -243,7 +244,7 @@ export async function fetchFinancialAdvice() {
 
   const data = await res.json();
 
-  // ✅ Return directly, since data already has `insights`, `monthly_health`, `updated_at`
+  // Return directly, since data already has `insights`, `monthly_health`, `updated_at`
   return data;
 }
 export async function generateFinancialAdvice() {
@@ -263,6 +264,46 @@ export async function generateFinancialAdvice() {
 
   const data = await res.json();
 
-  // ✅ This endpoint returns { success: true, advice_json: {...} }
   return data.advice_json;
+}
+
+
+
+
+export async function syncGmailStatements() {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+
+  const res = await fetch(`${API_BASE}/gmail/sync`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.detail || "Failed to sync Gmail statements");
+  }
+
+  return await res.json(); // returns { synced_pdfs: N }
+}
+
+
+
+export async function linkGmailAccount(password) {
+  const user = getAuth().currentUser;
+  if (!user) throw new Error("User not authenticated");
+
+  const token = await user.getIdToken();
+
+  const params = new URLSearchParams({
+    token,
+    password,
+  });
+
+  // Redirect to backend which will generate Gmail auth URL
+  window.location.href = `${API_BASE}/auth/gmail?${params.toString()}`;
 }

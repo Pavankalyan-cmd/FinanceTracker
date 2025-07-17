@@ -6,11 +6,21 @@ import google.generativeai as genai
 import json
 import re
 import os
+from dateutil.relativedelta import relativedelta
+import calendar
+from collections import defaultdict
+
 router = APIRouter(prefix="/ai", tags=["Financial Advice"])
 db = firestore.client()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-2.0-flash")
+def parse_date_safe(date_str):
+    try:
+        return datetime.strptime(date_str.strip(), "%Y-%m-%d")
+    except Exception as e:
+
+        return None
 
 @router.post("/financial-advice/generate")
 def generate_financial_advice(request: Request):
@@ -27,7 +37,6 @@ def generate_financial_advice(request: Request):
     today = datetime.today()
     txns = [t for t in txns if "date" in t and datetime.strptime(t["date"], "%Y-%m-%d") >= jan1]
 
-
     # Filter and calculate totals
     income = sum(t["amount"] for t in txns if t["category"] == "Salary")
     expenses = sum(t["amount"] for t in txns if t["type"] == "debit")
@@ -37,35 +46,83 @@ def generate_financial_advice(request: Request):
     # Estimate months since Jan 1
     num_months = max((today - jan1).days // 30, 1)
 
-    # Filter for current month
-    current_month_start = datetime(today.year, today.month, 1)
-    month_txns = [t for t in txns if datetime.strptime(t["date"], "%Y-%m-%d") >= current_month_start]
-    month_income = sum(t["amount"] for t in month_txns if t["type"] == "credit")
-    month_expenses = sum(t["amount"] for t in month_txns if t["type"] == "debit")
+    # Use last full month for budgeting
+    today = datetime.today()
+    last_month = today.replace(day=1) - relativedelta(months=1)
+    last_month_year = last_month.year
+    last_month_month = last_month.month
+
+    last_day = calendar.monthrange(last_month_year, last_month_month)[1]
+
+    last_month_start = datetime(last_month_year, last_month_month, 1)
+    last_month_end = datetime(last_month_year, last_month_month, last_day)
+
+   
+    month_txns = []
+    for t in txns:
+        dt = parse_date_safe(t.get("date", ""))
+        if not dt:
+            continue
+        if last_month_start <= dt <= last_month_end:
+            month_txns.append(t)
+      
+        
+
+
+
+    month_income = sum(
+    t["amount"] for t in month_txns
+    if t.get("type", "").strip().lower() == "credit"
+    )
+    month_expenses = sum(
+        t["amount"] for t in month_txns
+        if t.get("type", "").strip().lower() == "debit"
+    )
     month_savings = month_income - month_expenses
     month_savings_rate = round((month_savings / month_income) * 100, 2) if month_income else 0
+
 
     # Fetch goals
     goals_ref = db.collection("users").document(user_id).collection("goals")
     goals_docs = goals_ref.stream()
+    goals_raw = [doc.to_dict() | {"id": doc.id} for doc in goals_docs]
+    # Fetch goal contributions (auto allocated)
+    contrib_ref = db.collection("users").document(user_id).collection("goal_contributions")
+    contrib_docs = contrib_ref.stream()
+
+    auto_allocated_map = defaultdict(float)
+    for doc in contrib_docs:
+        data = doc.to_dict()
+        auto_allocated_map[data["goal_id"]] += data.get("allocated", 0)
+    # Now enhance goal data with total allocation
+    today = datetime.today()
     goals = []
     total_goal_required = 0
-    for doc in goals_docs:
-        g = doc.to_dict()
+
+    for g in goals_raw:
+        manual_alloc = g.get("manual_allocated", 0)
+        auto_alloc = auto_allocated_map.get(g["id"], 0)
+        total_alloc = manual_alloc + auto_alloc
+
         deadline = datetime.strptime(g["deadline"], "%Y-%m-%d")
         months_left = max((deadline - today).days // 30, 1)
-        remaining = g["target_amount"] - g.get("manual_allocated", savings)
+        remaining = g["target_amount"] - total_alloc
         monthly_required = round(remaining / months_left, 2)
         total_goal_required += monthly_required
+
         g.update({
+            "allocated": total_alloc,
+            "progress_percent": round((total_alloc / g["target_amount"]) * 100, 2) if g["target_amount"] > 0 else 0,
             "months_left": months_left,
-            "progress_percent": round((g.get("manual_allocated", 0) / g["target_amount"])*100, 2),
-            "allocated": g.get("manual_allocated", 0)
+            "required_monthly_saving": monthly_required
         })
+
         goals.append(g)
+        
+    # ✅ Ensure required savings per month doesn’t exceed income
+    total_goal_required = min(total_goal_required, month_income)
 
-
-    # Category-wise spending
+    # Category-wise spending (Jan 1 to today)
     category_map = {}
     for t in txns:
         if t["type"] == "debit":
@@ -74,7 +131,11 @@ def generate_financial_advice(request: Request):
     category_spending = [{"name": k, "amount": v} for k, v in category_map.items()]
 
     # Notable transactions (top 3)
-    large_txns = sorted([t for t in txns if t["type"] == "debit"], key=lambda x: x["amount"], reverse=True)[:3]
+    large_txns = sorted(
+        [t for t in txns if t["type"] == "debit"],
+        key=lambda x: x["amount"],
+        reverse=True
+    )[:3]
 
     # Construct prompt inline
     goals_text = "\n".join([
@@ -83,7 +144,8 @@ def generate_financial_advice(request: Request):
     ])
     category_text = "\n".join([f"- {c['name']}: ₹{c['amount']} spent" for c in category_spending])
     transactions_text = "\n".join([f"- ₹{t['amount']} on {t['category']} — \"{t['title']}\"" for t in large_txns])
-    instructions_block = """
+
+    instructions_block ="""
 Instructions:
 
 Give a personalized breakdown in **4 sections**:
@@ -170,7 +232,7 @@ Use this scale to assign the financial_grade:
 - F  : < 5%
 
 - "financial_grade": a letter grade (A+, A, B, C, etc.) based on current month savings rate
-- "savings_rate": actual percentage saved this month
+- "savings_rate": actual percentage saved last month
 - "potential_savings": possible additional savings amount user could make with better spending habits
 - "areas_to_improve": 3 categories or habits the user could improve
 Instead of returning separate goal_advice, recommended_budget, positive_messages, and tips — 
@@ -225,7 +287,7 @@ Your job is to:
 - Warn them when they overspend, and encourage them when they stay on track
 - Give advice that is clear, friendly, and based on real numbers
 
- Time Range: January 1 to Today
+ Time Range: January 1 to last month end date
  Summary:
 - Total Income: ₹{income}
 - Total Expenses: ₹{expenses}
@@ -241,6 +303,7 @@ Your job is to:
 
  Notable Transactions:
 {transactions_text}
+
 This Month's Performance:
 - Monthly Income: ₹{month_income}
 - Monthly Expenses: ₹{month_expenses}
@@ -250,10 +313,9 @@ This Month's Performance:
 
 ---
 {instructions_block}
-
- 
-
 """
+   
+
     try:
         res = model.generate_content(prompt)
         advice_text = res.text.strip()
@@ -261,22 +323,19 @@ This Month's Performance:
         advice = json.loads(advice_text)
 
         db.collection("users").document(user_id).collection("advice").document("latest").set({
-        "insights": advice.get("insights", []),
-        "monthly_health": advice.get("monthly_health", {}),
-        "updated_at": datetime.utcnow().isoformat()
-    })
+            "insights": advice.get("insights", []),
+            "monthly_health": advice.get("monthly_health", {}),
+            "updated_at": datetime.utcnow().isoformat()
+        })
 
         return {"success": True, "advice_json": advice}
 
     except json.JSONDecodeError as e:
-
         raise HTTPException(status_code=500, detail=f"Gemini response was not valid JSON: {e}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
-
-
-
+    
 
 @router.get("/financial-advice")
 def get_financial_advice(request: Request):

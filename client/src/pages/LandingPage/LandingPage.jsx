@@ -7,6 +7,7 @@ import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import WalletOutlinedIcon from "@mui/icons-material/WalletOutlined";
 import EmojiObjectsOutlinedIcon from "@mui/icons-material/EmojiObjectsOutlined";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 const LandingPage = () => {
   const navigate = useNavigate(); // 👈 initialize navigate
@@ -63,13 +64,14 @@ const LandingPage = () => {
 
         <section className="landing-summary-cards">
           <div className="landing-summary-card">
-            <MonetizationOnOutlinedIcon className="summary-icon green" />
-            <div className="summary-value green">$12,456.78</div>
+         
+            <CurrencyRupeeIcon className="summary-icon green" />
+            <div className="summary-value green">₹ 12,456.78</div>
             <div className="summary-label">Total Balance</div>
           </div>
           <div className="landing-summary-card">
             <BarChartOutlinedIcon className="summary-icon red" />
-            <div className="summary-value red">$3,248.92</div>
+            <div className="summary-value red">₹ 3,248.92</div>
             <div className="summary-label">Monthly Spending</div>
           </div>
           <div className="landing-summary-card">

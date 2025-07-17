@@ -9,7 +9,8 @@ const FinancialInsightsPage = () => {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("Monthly");
   const [scoreDuration, setScoreDuration] = useState("3 Month");
-
+  const [fallbackUsed, setFallbackUsed] = useState(false);
+  const [fallbackLabel, setFallbackLabel] = useState("");
   const [categorySummary, setCategorySummary] = useState([]);
   const [spendingTrends, setSpendingTrends] = useState({});
   const [healthScore3, setHealthScore3] = useState(null);
@@ -40,6 +41,8 @@ const FinancialInsightsPage = () => {
       setSpendingTrends(insights?.spending_trends || {});
       setHealthScore3(insights?.health_score_3_month || {});
       setHealthScore6(insights?.health_score_6_month || {});
+      setFallbackUsed(insights?.fallback || false);
+      setFallbackLabel(insights?.fallback_label || "");
     } catch (err) {
       console.error("Error fetching insights:", err);
       toast.error("Failed to fetch financial insights");
@@ -48,8 +51,26 @@ const FinancialInsightsPage = () => {
     }
   };
 
+
   return (
     <div className="financial-insights-page">
+      {fallbackUsed && (
+        <div
+          style={{
+            backgroundColor: "#fff3cd",
+            color: "#856404",
+            padding: "10px 16px",
+            borderRadius: "6px",
+            marginBottom: "14px",
+            border: "1px solid #ffeeba",
+            fontSize: "14px",
+          }}
+        >
+          ⚠️ Data shown is for <strong>{fallbackLabel}</strong>, since current{" "}
+          {period.toLowerCase()} bank statement isn’t uploaded yet.
+        </div>
+      )}
+
       {/* Header */}
       <div className="insights-header-row">
         <h2 className="insights-title">Financial Insights</h2>
@@ -301,7 +322,7 @@ const FinancialInsightsPage = () => {
           )}
         </div>
       </div>
-      {console.log(spendingTrends)}
+
     </div>
   );
 };

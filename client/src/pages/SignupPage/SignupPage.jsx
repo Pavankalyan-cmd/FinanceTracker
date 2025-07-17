@@ -27,7 +27,12 @@ const SignupPage = ({ onBack, onGoogle, onGitHub, onSignIn }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
+  const handleSignin = () => {
+    navigate("/login");
+  };
+    const handleBack = () => {
+      navigate("/");
+    };
   const handleAuthSuccess = () => {
     toast.success("Account created successfully!");
     navigate("/dashboard");
@@ -98,7 +103,7 @@ const SignupPage = ({ onBack, onGoogle, onGitHub, onSignIn }) => {
 
   return (
     <div className="signup-root">
-      <div className="signup-back-home" onClick={onBack}>
+      <div className="signup-back-home" onClick={handleBack}>
         <ArrowBackIosNewIcon fontSize="small" /> Back to Home
       </div>
       <div className="signup-header">
@@ -130,8 +135,8 @@ const SignupPage = ({ onBack, onGoogle, onGitHub, onSignIn }) => {
         >
           Continue with GitHub
         </Button>
-        <div className="signup-divider">
-          <span>OR CONTINUE WITH EMAIL</span>
+        <div className="signup-divider" style={{ textAlign: "center" }}>
+          {"   "} <p>OR CONTINUE WITH EMAIL</p>
         </div>
         <form className="signup-form" onSubmit={handleEmailSignup}>
           <div className="signup-name-row">
@@ -231,7 +236,7 @@ const SignupPage = ({ onBack, onGoogle, onGitHub, onSignIn }) => {
         </form>
         <div className="signup-footer">
           Already have an account?{" "}
-          <span className="signup-signin-link" onClick={onSignIn}>
+          <span className="signup-signin-link" onClick={handleSignin}>
             Sign in
           </span>
         </div>

@@ -5,7 +5,12 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import WalletIcon from "@mui/icons-material/Wallet";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
-import { uploadBankStatement, fetchTransactions,generateFinancialAdvice } from "../services/services";
+import {
+  uploadBankStatement,
+  fetchTransactions,
+  generateFinancialAdvice,
+  syncGmailStatements,
+} from "../services/services";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ClipLoader } from "react-spinners";
@@ -17,36 +22,52 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 const OverviewPage = () => {
   const fileInputRef = useRef();
   const hasFetched = useRef(false);
-  const shouldTriggerUpload = useRef(false); 
+  const shouldTriggerUpload = useRef(false);
   const [skipContinuityCheck, setSkipContinuityCheck] = useState(false);
-
-
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadSteps, setUploadSteps] = useState([]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const [summary, setSummary] = useState({
     totalBalance: 0,
     monthlySpending: 0,
+    averageMonthlySpending: 0,
     categoryCount: 0,
   });
 
-  const [uploadSteps, setUploadSteps] = useState([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const handleSyncGmail = async () => {
+    const toastId = toast.loading("📥 Syncing Gmail statements...");
+    try {
+      const result = await syncGmailStatements();
+      toast.update(toastId, {
+        render: `Synced ${result.synced_pdfs} PDF(s) from Gmail.`,
+        type: "success",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    } catch (err) {
+      toast.update(toastId, {
+        render: err.message || "Gmail sync failed.",
+        type: "error",
+        isLoading: false,
+        autoClose: 4000,
+      });
+    }
+  };
 
   useEffect(() => {
     const triggerUploadListener = () => {
       shouldTriggerUpload.current = true;
     };
-
     window.addEventListener("trigger-upload", triggerUploadListener);
     return () => {
       window.removeEventListener("trigger-upload", triggerUploadListener);
     };
   }, []);
 
-  // ✅ Check when loading completes to trigger file input
   useEffect(() => {
     if (!loading && shouldTriggerUpload.current && fileInputRef.current) {
       fileInputRef.current.click();
@@ -54,13 +75,13 @@ const OverviewPage = () => {
     }
   }, [loading]);
 
-  // ✅ Your existing fetch logic
   useEffect(() => {
     if (!hasFetched.current) {
       hasFetched.current = true;
       fetchAndSetTransactions();
     }
   }, []);
+
   const fetchAndSetTransactions = async () => {
     try {
       setLoading(true);
@@ -74,11 +95,11 @@ const OverviewPage = () => {
     }
   };
 
-
   const computeSummary = (transactions) => {
     let creditTotal = 0;
     let debitTotal = 0;
     let monthlySpending = 0;
+    let monthlySpendMap = new Map();
     const categories = new Set();
 
     const now = new Date();
@@ -88,6 +109,7 @@ const OverviewPage = () => {
     for (let tx of transactions) {
       const amt = parseFloat(tx.amount || 0);
       const txDate = new Date(tx.date);
+      const key = `${txDate.getFullYear()}-${txDate.getMonth() + 1}`;
 
       if (tx.type === "credit") creditTotal += amt;
 
@@ -99,14 +121,24 @@ const OverviewPage = () => {
         ) {
           monthlySpending += amt;
         }
+
+        monthlySpendMap.set(key, (monthlySpendMap.get(key) || 0) + amt);
       }
 
       if (tx.category) categories.add(tx.category);
     }
 
+    const months = monthlySpendMap.size;
+    const totalPastSpending = Array.from(monthlySpendMap.values()).reduce(
+      (a, b) => a + b,
+      0
+    );
+    const averageMonthlySpending = months > 0 ? totalPastSpending / months : 0;
+
     setSummary({
       totalBalance: creditTotal - debitTotal,
       monthlySpending,
+      averageMonthlySpending,
       categoryCount: categories.size,
     });
   };
@@ -118,12 +150,14 @@ const OverviewPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) handleUpload(file);
+    e.target.value = null;
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file) handleUpload(file);
+    e.dataTransfer.value = null;
   };
 
   const handleUpload = async (file) => {
@@ -139,7 +173,7 @@ const OverviewPage = () => {
     try {
       for (let i = 0; i < 4; i++) {
         setCurrentStep(i);
-        await new Promise((res) => setTimeout(res, 1000)); // simulate delay
+        await new Promise((res) => setTimeout(res, 1000));
       }
 
       const result = await uploadBankStatement(
@@ -153,16 +187,13 @@ const OverviewPage = () => {
         toast.warning(warning);
         return;
       }
-      console.log("Upload API result:", result);
 
-      
       toast.success(`${result.data.length} transactions uploaded`);
       setShowConfetti(true);
-
       setTimeout(() => setShowConfetti(false), 4000);
+
       await fetchAndSetTransactions();
       await generateFinancialAdvice();
-      toast.info("AI financial advice updated");
     } catch (err) {
       console.error("Upload failed:", err);
       toast.error("Upload failed: " + (err.message || "Unknown error"));
@@ -198,6 +229,7 @@ const OverviewPage = () => {
                       end={summary.totalBalance}
                       duration={1.5}
                       separator=","
+                      decimals={0}
                     />
                   </div>
                 </div>
@@ -214,9 +246,10 @@ const OverviewPage = () => {
                   <div className="summary-value red">
                     ₹
                     <CountUp
-                      end={summary.monthlySpending}
+                      end={summary.averageMonthlySpending}
                       duration={1.5}
                       separator=","
+                      decimals={0}
                     />
                   </div>
                 </div>
@@ -225,6 +258,8 @@ const OverviewPage = () => {
                 </div>
               </div>
             </div>
+
+       
 
             <div className="summary-card">
               <div className="summary-card-content">
@@ -243,7 +278,36 @@ const OverviewPage = () => {
 
           {/* Upload Section */}
           <div className="upload-section">
-            <h2 className="upload-title">Upload Bank Statement</h2>
+            <div className="upload-line">
+              <h2 className="upload-title">Upload Bank Statement</h2>
+              <div style={{ marginTop: "1rem", textAlign: "center" }}>
+                <button
+                  onClick={handleSyncGmail}
+                  style={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    padding: "10px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                  }}
+                >
+                  <img
+                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                    alt="Google logo"
+                    width={20}
+                    height={20}
+                  />
+                  Sync Gmail Statements
+                </button>
+              </div>
+            </div>
+
             <p className="upload-desc">
               Upload your PDF bank or credit card statements for AI-powered
               transaction extraction
@@ -283,6 +347,7 @@ const OverviewPage = () => {
                 onChange={handleFileChange}
               />
             </div>
+
             <div
               style={{
                 marginTop: "1rem",

@@ -7,10 +7,13 @@ def extract_text_with_pdfplumber(content: bytes, password: Optional[str] = None)
     text = ""
     try:
         with pdfplumber.open(BytesIO(content), password=password) as pdf:
+
+  
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
+        
     except Exception as e:
         if "File has not been decrypted" in str(e):
             raise Exception("PDF is password-protected. Please provide the correct password.")
@@ -90,5 +93,5 @@ def extract_months_from_raw_blocks(transaction_blocks: List[str]) -> List[str]:
                 except Exception as e:
                     continue
 
-    print("[DEBUG] Found months:", sorted(months))
+
     return sorted(months)

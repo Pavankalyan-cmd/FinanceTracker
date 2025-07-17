@@ -43,7 +43,13 @@ const LoginPage = ({ onBack, onForgot, onSignup }) => {
     toast.success("Login successful!");
     navigate("/dashboard"); 
   };
+  const handleSignup = () => {
 
+    navigate("/signup");
+  };
+  const handleBack = () => {
+       navigate("/");
+     };
   const handleAuthError = (error) => {
     let errorMessage = "Login failed. Please try again.";
 
@@ -113,7 +119,7 @@ const LoginPage = ({ onBack, onForgot, onSignup }) => {
 
   return (
     <div className="login-root">
-      <div className="login-back-home" onClick={onBack}>
+      <div className="login-back-home" onClick={handleBack}>
         <ArrowBackIosNewIcon fontSize="small" /> Back to Home
       </div>
       <div className="login-header">
@@ -145,8 +151,8 @@ const LoginPage = ({ onBack, onForgot, onSignup }) => {
         >
           Continue with GitHub
         </Button>
-        <div className="login-divider">
-          <span>OR CONTINUE WITH EMAIL</span>
+        <div className="signup-divider" style={{ textAlign: "center" }}>
+          {"   "} <p>OR CONTINUE WITH EMAIL</p>
         </div>
         <form className="login-form" onSubmit={handleEmailLogin}>
           <TextField
@@ -215,7 +221,7 @@ const LoginPage = ({ onBack, onForgot, onSignup }) => {
         </form>
         <div className="login-footer">
           Don&apos;t have an account?{" "}
-          <span className="login-signup-link" onClick={onSignup}>
+          <span className="login-signup-link" onClick={handleSignup}>
             Create one now
           </span>
         </div>

@@ -257,4 +257,12 @@
     font-weight: 500;
     padding: 10px;
   }
-  
+  .upload-line{
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+  }
+  .upload-title{
+    margin-left: 38%;
+
+  }

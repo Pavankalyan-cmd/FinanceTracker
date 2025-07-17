@@ -115,11 +115,11 @@ def call_gemini_and_get_json(prompt: str):
         elif isinstance(parsed, list):
             return parsed
         else:
-            print("Unexpected structure:", parsed)
+
             return []
 
     except Exception as e:
-        print("Error talking to Gemini or processing response:", e)
+
         return []
 
 

@@ -86,7 +86,7 @@ body, html {
   box-shadow: 0 2px 8px rgba(35, 37, 38, 0.08);
 }
 .signup-divider {
-  display: flex;
+  /* display: flex; */
   align-items: center;
   text-align: center;
   color: #b0b8c1;

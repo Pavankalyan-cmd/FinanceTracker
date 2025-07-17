@@ -10,6 +10,7 @@ import LoginPage from "../LoginPage/LoginPage";
 import SignupPage from "../SignupPage/SignupPage";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import UserProfile from "../Userprofile/UserProfile";
 
 export default function MainPage() {
   return (
@@ -29,6 +30,7 @@ export default function MainPage() {
           />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="financial-advice" element={<FinancialAdvicePage />} />
+          <Route path="userprofile"element={<UserProfile/>}/>
         </Route>
       </Route>
 

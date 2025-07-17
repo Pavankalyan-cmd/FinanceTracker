@@ -48,14 +48,22 @@
   .upload-btn:hover {
     box-shadow: 0 4px 16px rgba(30, 203, 107, 0.16);
   }
-  
-  .dashboard-nav {
+  .dashboard-nav{
+    display: flex;
+    justify-content: space-around;
+  }
+  .dashboard-button {
     display: flex;
     gap: 32px;
     padding: 1% 10%;
     background: #fafbfc;
+    width: 80%;
    
 
+  }
+  .dashboard-profile{
+    padding: 1% 10%;
+    width: 20%;
   }
   
   .nav-btn {
@@ -157,3 +165,55 @@
 
 
   } 
+
+
+
+  .dashboard-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .profile-dropdown {
+    position: relative;
+    padding: 1%;
+  }
+  
+  .profile-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #f1f1f1;
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 110%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 120%;
+    z-index: 1000;
+  }
+  
+  .dropdown-item {
+    padding: 10px 14px;
+    width: 88%;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .logout {
+    color: red;
+  }
+  

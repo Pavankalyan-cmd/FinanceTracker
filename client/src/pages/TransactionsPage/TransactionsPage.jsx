@@ -99,29 +99,43 @@ const TransactionsPage = () => {
   };
 
   const handleExport = () => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      ["Title,Date,Amount,Type,Category,Payment Method"]
-        .concat(
-          filteredTxns.map((tx) =>
-            [
-              tx.title,
-              tx.date,
-              tx.amount,
-              tx.type,
-              tx.category,
-              tx.payment_method || "Unknown",
-            ].join(",")
-          )
-        )
-        .join("\n");
+    const csvHeader = [
+      "Title",
+      "Date",
+      "Debit",
+      "Credit",
+      "Payment Method",
+      "Category",
+    ];
 
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    const csvRows = filteredTxns.map((tx) => {
+      const isCredit = tx.type === "credit";
+      const debit = !isCredit ? `₹${parseFloat(tx.amount).toFixed(2)}` : "";
+      const credit = isCredit ? `₹${parseFloat(tx.amount).toFixed(2)}` : "";
+      const title = tx.title?.replace(/"/g, '""'); // Escape quotes in title
+
+      return [
+        `"${title}"`,
+        tx.date,
+        debit,
+        credit,
+        tx.payment_method || "Not specified",
+        tx.category || "Uncategorized",
+      ].join(",");
+    });
+
+    const csvContent = [csvHeader.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "transactions.csv";
+    link.style.display = "none";
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
+  
 
   const getHeadingTitle = () => {
     if (!month) return "Transactions";
@@ -248,9 +262,7 @@ const TransactionsPage = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell
-                        sx={{ color: !isCredit ? "#4caf50" : "inherit" }}
-                      >
+                      <TableCell sx={{ color: !isCredit ? "red" : "inherit" }}>
                         {!isCredit && `₹${parseFloat(tx.amount).toFixed(2)}`}
                       </TableCell>
                       <TableCell
