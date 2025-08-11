@@ -42,7 +42,7 @@ COPY --from=builder /root/.local /home/appuser/.local
 COPY --from=builder /app /app
 
 # Copy Nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /backend/nginx/nginx.conf
 
 USER appuser
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from firebase_admin import auth, firestore
 from typing import List
 from app.dependencies.verify_token import verify_firebase_token
+from app.core.firebase_config import db
 
 
 router = APIRouter()
@@ -11,7 +12,6 @@ router = APIRouter()
 
 
 def get_pending_review_transactions(uid: str) -> List[dict]:
-    db = firestore.client()
 
     transactions_ref = (
         db.collection("users")
