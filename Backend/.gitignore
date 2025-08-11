@@ -14,16 +14,30 @@ db.sqlite3
 /static_root/ # Or whatever your STATIC_ROOT is set to
 
 # Environment variables
-.env
 *.env
 
-# Firebase credentials
+.env
 serviceAccountKey.json
+serviceAccountKey.b64
 
 # IDE specific files
 .vscode/
 .idea/
 
 # OS generated files
+.DS_Store
+Thumbs.db
+
+# Virtual environment
+venv/
+env/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# OS-specific
 .DS_Store
 Thumbs.db
