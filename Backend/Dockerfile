@@ -1,55 +1,54 @@
 # ===== Stage 1: Builder =====
 FROM python:3.11-slim AS builder
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Set working directory
 WORKDIR /app
 
-# Install build tools (for dependencies with C extensions)
+# Install build tools for C extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency list and install packages into local user directory
+# Copy dependency list and install Python packages
 COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
+# Copy service account key
+COPY serviceAccountKey.json ./serviceAccountKey.json
 
-
-copy ./serviceAccountKey.json ./serviceAccountKey.json
-
-# Copy source code
+# Copy application code
 COPY . .
 
 # ===== Stage 2: Runtime =====
 FROM python:3.11-slim AS runtime
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/home/appuser/.local/bin:$PATH"
 
+# Install Nginx
+RUN apt-get update && apt-get install -y --no-install-recommends nginx \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user
 RUN adduser --disabled-password --gecos "" appuser
 
-# Set working directory
 WORKDIR /app
 
-# Copy only the installed packages and app code from builder stage
+# Copy installed packages and source code
 COPY --from=builder /root/.local /home/appuser/.local
 COPY --from=builder /app /app
 
-# Change to non-root user
+# Copy Nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
 USER appuser
 
-# Expose port (for FastAPI)
+# Uvicorn runs internally on 8000, Nginx listens on $PORT
 EXPOSE 8000
+EXPOSE 10000
 
-# Start with gunicorn and uvicorn worker
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
-
-# For production, use: uvicorn app_factory:create_app --factory --host 0.0.0.0 --port 80
-# Or with Gunicorn: gunicorn -k uvicorn.workers.UvicornWorker app_factory:create_app --factory --bind 0.0.0.0:80
+# Start both Nginx and Uvicorn
+CMD sh -c "uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"
