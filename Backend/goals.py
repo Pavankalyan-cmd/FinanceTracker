@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from uuid import uuid4
+from firebase_admin import firestore
 from datetime import datetime
-from app.dependencies.verify_token import verify_firebase_token
+from firebase_config import verify_firebase_token
 from collections import defaultdict
-from app.core.firebase_config import db
-router = APIRouter()
 
+router = APIRouter()
+db = firestore.client()
 
 class GoalInput(BaseModel):
     name: str
@@ -14,35 +15,47 @@ class GoalInput(BaseModel):
     deadline: str  # "YYYY-MM-DD"
     manual_allocated: float | None = None
 
-
-
-
 @router.post("/goals")
-def add_goal(user=Depends(verify_firebase_token), goal: GoalInput = None):
-    uid = user["uid"]
+def add_goal(request: Request, goal: GoalInput):
+    uid = verify_firebase_token(request)
+
+    if not uid:
+        raise HTTPException(status_code=401, detail="Missing user ID")
+
     goal_id = str(uuid4())
     goal_data = {
         **goal.dict(),
         "created_at": datetime.utcnow().isoformat()
     }
+
     db.collection("users").document(uid).collection("goals").document(goal_id).set(goal_data)
     return {"message": "Goal added", "goal_id": goal_id}
 
+
 @router.put("/goals/{goal_id}")
-def edit_goal(goal_id: str, user=Depends(verify_firebase_token), goal: GoalInput = None):
-    uid = user["uid"]
+def edit_goal(goal_id: str, request: Request, goal: GoalInput):
+    uid = verify_firebase_token(request)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Missing user ID")
+
     goal_ref = db.collection("users").document(uid).collection("goals").document(goal_id)
     if not goal_ref.get().exists:
         raise HTTPException(status_code=404, detail="Goal not found")
+
     goal_ref.update(goal.dict())
     return {"message": "Goal updated"}
 
+
 @router.delete("/goals/{goal_id}")
-def delete_goal(goal_id: str, user=Depends(verify_firebase_token)):
-    uid = user["uid"]
+def delete_goal(goal_id: str, request: Request):
+    uid = verify_firebase_token(request)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Missing user ID")
+
     goal_ref = db.collection("users").document(uid).collection("goals").document(goal_id)
     if not goal_ref.get().exists:
         raise HTTPException(status_code=404, detail="Goal not found")
+
     goal_ref.delete()
     return {"message": "Goal deleted"}
 
@@ -55,8 +68,10 @@ def calculate_months_left(deadline_str):
     return months
 
 @router.get("/goals")
-def get_goals_with_progress(user=Depends(verify_firebase_token)):
-    uid = user["uid"]
+def get_goals_with_progress(request: Request):
+    uid = verify_firebase_token(request)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Missing user ID")
 
     # Fetch goals
     goals_ref = db.collection("users").document(uid).collection("goals")
@@ -127,6 +142,7 @@ def calculate_monthly_savings(transactions):
 
 
 def auto_allocate_to_goals(user_id: str, savings_by_month: dict):
+    db = firestore.client()
 
     # Fetch active goals
     goals_ref = db.collection("users").document(user_id).collection("goals")

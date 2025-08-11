@@ -2,7 +2,7 @@
 import os
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from app.core.firebase_config import db
+from firebase_config import db
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Request, HTTPException
 from firebase_admin import firestore
-from app.dependencies.verify_token import verify_firebase_token
+from firebase_config import verify_firebase_token
 from datetime import datetime
 import google.generativeai as genai
 import json
@@ -9,11 +9,9 @@ import os
 from dateutil.relativedelta import relativedelta
 import calendar
 from collections import defaultdict
-from app.core.firebase_config import db
-
-
 
 router = APIRouter(prefix="/ai", tags=["Financial Advice"])
+db = firestore.client()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("gemini-2.0-flash")
@@ -25,8 +23,10 @@ def parse_date_safe(date_str):
         return None
 
 @router.post("/financial-advice/generate")
-def generate_financial_advice(request=Depends(verify_firebase_token)):
-    user_id = request["uid"]
+def generate_financial_advice(request: Request):
+    user_id = verify_firebase_token(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     # Fetch transactions
     txns_ref = db.collection("users").document(user_id).collection("transactions")
@@ -119,6 +119,7 @@ def generate_financial_advice(request=Depends(verify_firebase_token)):
 
         goals.append(g)
         
+    # ✅ Ensure required savings per month doesn’t exceed income
     total_goal_required = min(total_goal_required, month_income)
 
     # Category-wise spending (Jan 1 to today)
@@ -337,8 +338,10 @@ This Month's Performance:
     
 
 @router.get("/financial-advice")
-def get_financial_advice(request=Depends(verify_firebase_token)):
-    user_id = request["uid"]
+def get_financial_advice(request: Request):
+    user_id = verify_firebase_token(request)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     doc = db.collection("users").document(user_id).collection("advice").document("latest").get()
     if doc.exists:
