@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import "./FinancialAdvicePage.css";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
@@ -94,7 +95,7 @@ const FinancialAdvicePage = () => {
   return (
     <div className="financial-advice-page">
       <div className="advice-header-row">
-        <h2 className="advice-title">Personalized Financial Advice</h2>
+        <h2 className="advice-title modern-title">🤖 Personalized Financial Advice</h2>
         <Button
           variant="outlined"
           className="refresh-btn"
@@ -112,7 +113,13 @@ const FinancialAdvicePage = () => {
         </p>
       )}
 
-      <div className="advice-card">
+      <motion.div
+        className="advice-card modern-card"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        viewport={{ once: true, amount: 0.3 }}
+      >
         <div className="advice-card-header">
           <InfoOutlinedIcon className="advice-info-icon" />
           <span className="advice-card-title">AI-Powered Insights</span>
@@ -137,24 +144,30 @@ const FinancialAdvicePage = () => {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <FinancialGoalsCard />
 
       {healthStats.length > 0 && (
-        <div className="advice-card advice-health-card">
+        <motion.div
+          className="advice-card advice-health-card modern-card"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
           <h3>Last Month's Financial Health</h3>
           <div className="advice-health-row">
             {healthStats.map((stat, idx) => (
               <Tooltip title={stat.tooltip} key={idx} arrow>
-                <div className={`advice-health-col ${stat.color}`}>
+                <div className={`advice-health-col modern-shadow ${stat.color}`}>
                   <div className="advice-health-value">{stat.value}</div>
                   <div className="advice-health-label">{stat.label}</div>
                 </div>
               </Tooltip>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       <div className="advice-disclaimer">

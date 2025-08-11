@@ -1,20 +1,10 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
-from firebase_admin import auth, firestore
+from firebase_admin import firestore
+
+from app.dependencies.verify_token import verify_firebase_token
 
 router = APIRouter()
-#  Verify Firebase token
-def verify_firebase_token(request: Request) -> str:
-    auth_header = request.headers.get("authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    id_token = auth_header.split("Bearer ")[1]
-    try:
-        decoded_token = auth.verify_id_token(id_token)
-        return decoded_token["uid"]
-    except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
 # Request Body Schema
 class UpdateCategoryRequest(BaseModel):

@@ -1,4 +1,6 @@
 import React, { useRef,useState, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 import "./CategoriesPage.css";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
@@ -93,9 +95,9 @@ const CategoriesPage = () => {
   return (
     <div className="category-management-page">
       <div className="category-header-row">
-        <h2 className="category-title">Category Management</h2>
+        <h2 className="category-title modern-title">Category Management</h2>
       </div>
-      <div className="category-card">
+      <div className="category-card modern-card">
         <div className="pending-review-header">
           <WarningAmberOutlinedIcon
             className="pending-warning-icon"
@@ -106,11 +108,15 @@ const CategoriesPage = () => {
         </div>
         <div className="pending-list">
           {pendingTransactions.map((tx, idx) => (
-            <div
+            <motion.div
               key={tx.id}
-              className={`pending-row ${
+              className={`pending-row modern-card ${
                 successIndex === idx ? "fade-out" : ""
               }`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              viewport={{ once: true, amount: 0.2 }}
             >
               <div className="pending-info">
                 <div className="pending-name">{tx.title}</div>
@@ -133,7 +139,7 @@ const CategoriesPage = () => {
                   </Select>
                 ) : (
                   <span
-                    className={`category-badge ${getCategoryColor(
+                    className={`category-badge modern-badge ${getCategoryColor(
                       tx.category
                     )}`}
                   >
@@ -188,7 +194,7 @@ const CategoriesPage = () => {
                   />
                 </Tooltip>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

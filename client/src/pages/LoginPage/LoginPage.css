@@ -139,7 +139,7 @@ body, html {
   padding: 12px 0 !important;
   text-transform: none !important;
   margin-top: 8px !important;
-  background: linear-gradient(90deg, #1ecb6b 0%, #1ea7fd 100%) !important;
+  background: linear-gradient(135deg, #7b1fa2, #ff4081) !important;
   color: #fff !important;
   box-shadow: 0 2px 8px rgba(30, 203, 107, 0.08);
 }

@@ -1,14 +1,18 @@
-from fastapi import APIRouter, Request, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from firebase_config import db, verify_firebase_token
+from app.core.firebase_config import db
 from calendar import month_name
+from app.dependencies.verify_token import verify_firebase_token
 
 router = APIRouter()
 
 @router.get("/financial-insights")
-def get_financial_insights(request: Request, period: str = Query("monthly")):
-    uid = verify_firebase_token(request)
+def get_financial_insights(
+    period: str = Query(default="monthly", enum=["weekly", "monthly", "yearly"]),
+    request=Depends(verify_firebase_token)
+):
+    uid = request["uid"]
     period = period.strip().lower()
 
     def get_date_ranges(period):

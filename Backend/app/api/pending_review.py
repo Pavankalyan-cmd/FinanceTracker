@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from firebase_admin import auth, firestore
 from typing import List
-from firebase_config import verify_firebase_token
+from app.dependencies.verify_token import verify_firebase_token
+
+
 router = APIRouter()
 
 
@@ -31,7 +33,8 @@ def get_pending_review_transactions(uid: str) -> List[dict]:
 
 
 @router.get("/transactions/pending-review")
-def fetch_pending_review_transactions(request: Request):
-    uid = verify_firebase_token(request)
+def fetch_pending_review_transactions(request=Depends(verify_firebase_token)):
+    user = request
+    uid = user["uid"]
     transactions = get_pending_review_transactions(uid)
     return {"transactions": transactions}

@@ -156,12 +156,13 @@ const TransactionsPage = () => {
       ) : (
         <>
           <div className="transactions-header-row">
-            <h2 className="transactions-title">{getHeadingTitle()}</h2>
-            <div className="transactions-actions">
+            <h2 className="transactions-title modern-title">📄 {getHeadingTitle()}</h2>
+            <div className="transactions-actions modern-card">
               <Box sx={{ minWidth: 130, marginRight: 2 }}>
                 <FormControl fullWidth>
                   <InputLabel>Month</InputLabel>
                   <Select
+                    className="modern-select"
                     value={month}
                     label="Month"
                     onChange={(e) => setMonth(e.target.value)}
@@ -184,6 +185,7 @@ const TransactionsPage = () => {
                 <FormControl fullWidth>
                   <InputLabel>Category</InputLabel>
                   <Select
+                    className="modern-select"
                     value={category}
                     label="Category"
                     onChange={(e) => setCategory(e.target.value)}
@@ -199,99 +201,93 @@ const TransactionsPage = () => {
                 </FormControl>
               </Box>
 
-              <Button variant="contained" onClick={handleFilter}>
+              <Button variant="contained" onClick={handleFilter} className="txn-btn">
                 Filter
               </Button>
-              <Button
-                variant="outlined"
-                onClick={handleReset}
-                sx={{ marginLeft: 1 }}
-              >
+              <Button variant="outlined" onClick={handleReset} className="txn-btn">
                 Reset
               </Button>
-              <Button
-                variant="outlined"
-                onClick={handleExport}
-                sx={{ marginLeft: 1 }}
-              >
+              <Button variant="outlined" onClick={handleExport} className="txn-btn">
                 Export
               </Button>
             </div>
           </div>
 
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Title</TableCell>
-                  <TableCell>Debit</TableCell>
-                  <TableCell>Credit</TableCell>
-                  <TableCell>Payment Method</TableCell>
-                  <TableCell>Category</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredTxns.map((tx, idx) => {
-                  const isCredit = tx.type === "credit";
-                  const color = getCategoryColor(tx.category);
+          <div className="transactions-table-wrapper modern-card">
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Title</TableCell>
+                    <TableCell>Debit</TableCell>
+                    <TableCell>Credit</TableCell>
+                    <TableCell>Payment Method</TableCell>
+                    <TableCell>Category</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredTxns.map((tx, idx) => {
+                    const isCredit = tx.type === "credit";
+                    const color = getCategoryColor(tx.category);
 
-                  return (
-                    <TableRow key={idx}>
-                      <TableCell>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: 8,
-                          }}
-                        >
-                          {isCredit ? (
-                            <AttachMoneyIcon fontSize="small" />
-                          ) : (
-                            <CreditCardIcon fontSize="small" />
-                          )}
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell>
                           <div
-                            style={{ display: "flex", flexDirection: "column" }}
+                            style={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 8,
+                            }}
                           >
-                            <span style={{ fontWeight: 500 }}>{tx.title}</span>
-                            <span
-                              style={{ fontSize: "0.85rem", color: "#777" }}
+                            {isCredit ? (
+                              <AttachMoneyIcon fontSize="small" />
+                            ) : (
+                              <CreditCardIcon fontSize="small" />
+                            )}
+                            <div
+                              style={{ display: "flex", flexDirection: "column" }}
                             >
-                              {tx.date}
-                            </span>
+                              <span style={{ fontWeight: 500 }}>{tx.title}</span>
+                              <span
+                                style={{ fontSize: "0.85rem", color: "#777" }}
+                              >
+                                {tx.date}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell sx={{ color: !isCredit ? "red" : "inherit" }}>
-                        {!isCredit && `₹${parseFloat(tx.amount).toFixed(2)}`}
-                      </TableCell>
-                      <TableCell
-                        sx={{ color: isCredit ? "#4caf50" : "inherit" }}
-                      >
-                        {isCredit && `₹${parseFloat(tx.amount).toFixed(2)}`}
-                      </TableCell>
-                      <TableCell>
-                        {tx.payment_method || "Not specified"}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`category-badge ${color}`}
-                          style={{
-                            padding: "4px 10px",
-                            borderRadius: 6,
-                            fontSize: "0.85rem",
-                            textTransform: "capitalize",
-                          }}
+                        </TableCell>
+                        <TableCell sx={{ color: !isCredit ? "red" : "inherit" }}>
+                          {!isCredit && `₹${parseFloat(tx.amount).toFixed(2)}`}
+                        </TableCell>
+                        <TableCell
+                          sx={{ color: isCredit ? "#4caf50" : "inherit" }}
                         >
-                          {tx.category}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                          {isCredit && `₹${parseFloat(tx.amount).toFixed(2)}`}
+                        </TableCell>
+                        <TableCell>
+                          {tx.payment_method || "Not specified"}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`category-badge modern-badge ${color}`}
+                            style={{
+                              padding: "4px 10px",
+                              borderRadius: 6,
+                              fontSize: "0.85rem",
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            {tx.category}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
         </>
       )}
     </div>

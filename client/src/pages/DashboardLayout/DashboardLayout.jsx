@@ -133,7 +133,8 @@ const DashboardLayout = () => {
                 className="profile-btn"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                👤 {user.displayName || "User"}
+                {/* Replace emoji with user icon placeholder */}
+                <span className="user-icon" aria-hidden="true">👤</span> {user.displayName || "User"}
               </button>
               {dropdownOpen && (
                 <div className="dropdown-menu">

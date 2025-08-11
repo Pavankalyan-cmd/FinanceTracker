@@ -278,40 +278,44 @@ const OverviewPage = () => {
 
           {/* Upload Section */}
           <div className="upload-section">
-            <div className="upload-line">
-              <h2 className="upload-title">Upload Bank Statement</h2>
-              <div style={{ marginTop: "1rem", textAlign: "center" }}>
-                <button
-                  onClick={handleSyncGmail}
-                  style={{
-                    backgroundColor: "#fff",
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    padding: "10px 16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <img
-                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                    alt="Google logo"
-                    width={20}
-                    height={20}
-                  />
-                  Sync Gmail Statements
-                </button>
-              </div>
-            </div>
+            <div className="upload-container">
+              <div className="upload-line">
+                <h2 className="upload-title">Upload Bank Statement</h2>
+                <div style={{ marginTop: "1rem", textAlign: "center" }}>
+                  <button
+                    onClick={handleSyncGmail}
+                    style={{
+                      background:"#fff",
 
-            <p className="upload-desc">
-              Upload your PDF bank or credit card statements for AI-powered
-              transaction extraction
-            </p>
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "10px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                      color: "black",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <img
+                      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                      alt="Google logo"
+                      width={20}
+                      height={20}
+                    />
+                    Sync Gmail Statements
+                  </button>
+                </div>
+              </div>
+
+              <p className="upload-desc">
+                Upload your PDF bank or credit card statements for AI-powered
+                transaction extraction
+              </p>
+            </div>
 
             <div
               className="upload-box"
@@ -374,7 +378,7 @@ const OverviewPage = () => {
           </div>
 
           {/* Features Section */}
-          <div className="features-row">
+          <div className="features-container">
             <div className="feature-card">
               <div className="feature-icon green-bg">
                 <SmartToyOutlinedIcon fontSize="large" />

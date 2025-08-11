@@ -72,14 +72,15 @@ const FinancialInsightsPage = () => {
       )}
 
       {/* Header */}
-      <div className="insights-header-row">
-        <h2 className="insights-title">Financial Insights</h2>
-        <ButtonGroup className="insights-toggle-group">
+      <div className="insights-header">
+        <h2 className="insights-title modern-title"> Financial Insights</h2>
+        <ButtonGroup className="insights-toggle-group modern-toggle">
           {["Weekly", "Monthly", "Yearly"].map((label) => (
             <Button
               key={label}
               variant={period === label ? "contained" : "outlined"}
               onClick={() => setPeriod(label)}
+              className="btn"
             >
               {label}
             </Button>
@@ -89,7 +90,7 @@ const FinancialInsightsPage = () => {
 
       {/* Category Summary + Health Score */}
       <div className="insights-main-row">
-        <div className="insights-card spending-by-category">
+        <div className="insights-card spending-by-category modern-card">
           <div className="insights-card-title">
             Spending by Category
             <Tooltip title="Compare your category-wise spending with previous period">
@@ -152,7 +153,7 @@ const FinancialInsightsPage = () => {
 
               return (
                 <div
-                  className="spending-category-row"
+                  className="spending-category-row modern-card"
                   key={cat.name}
                   style={{ marginBottom: "14px" }}
                 >
@@ -187,6 +188,7 @@ const FinancialInsightsPage = () => {
                       style={{
                         width: `${cat.percent}%`,
                         backgroundColor: "#1976d2",
+                        transition: "width 1s ease-in-out"
                       }}
                     />
 
@@ -196,6 +198,7 @@ const FinancialInsightsPage = () => {
                         style={{
                           width: `${Math.abs(cat.change)}%`,
                           backgroundColor: isDecrease ? "#1ecb6b" : "red",
+                          transition: "width 1s ease-in-out"
                         }}
                       />
                     )}
@@ -209,7 +212,7 @@ const FinancialInsightsPage = () => {
         </div>
 
         {/* Health Score */}
-        <div className="insights-card health-score-card">
+        <div className="insights-card health-score-card modern-card">
           <div className="insights-card-title">
             Financial Health Score
             <Tooltip title="Score based on income, expenses and savings trends">
@@ -217,7 +220,7 @@ const FinancialInsightsPage = () => {
             </Tooltip>
           </div>
 
-          <div className="health-score-circle">
+          <div className="health-score-circle" style={{background: '#e0e0e0', borderRadius: '50%', boxShadow: '8px 8px 15px #bebebe, -8px -8px 15px #ffffff', padding: '20px'}}>
             <CircularProgress
               variant="determinate"
               value={healthScoreData?.score || 0}
@@ -230,10 +233,10 @@ const FinancialInsightsPage = () => {
               }}
             />
             <div className="health-score-value">
-              <div className="health-score-number">
+              <div className="health-score-number" style={{fontWeight: '700', color: '#1e1e2f'}}>
                 {healthScoreData?.score || 0}
               </div>
-              <div className="health-score-label">{healthScoreLabel}</div>
+              <div className="health-score-label" style={{fontWeight: '700', color: '#1e1e2f'}}>{healthScoreLabel}</div>
             </div>
           </div>
           <ButtonGroup size="small" style={{ marginTop: 10 }}>
@@ -267,7 +270,7 @@ const FinancialInsightsPage = () => {
       </div>
 
       {/* Spending Trends */}
-      <div className="insights-card spending-trends">
+      <div className="insights-card spending-trends modern-card">
         <div className="insights-card-title">
           Spending Trends
           <Tooltip title="Compare your spending with the previous period">
@@ -311,7 +314,7 @@ const FinancialInsightsPage = () => {
                 color: "yellow",
               },
             ].map((trend, idx) => (
-              <div className={`spending-trend-card ${trend.color}`} key={idx}>
+              <div className={`spending-trend-card modern-trend-card ${trend.color}`} key={idx}>
                 <div className="spending-trend-value">{trend.value}</div>
                 <div className="spending-trend-label">{trend.label}</div>
                 <div className="spending-trend-sub">{trend.sub}</div>
