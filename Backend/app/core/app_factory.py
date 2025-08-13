@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import Config
 from app.api.goals import router as goals_router
@@ -20,11 +20,14 @@ def create_app():
         allow_headers=["*"],
     )
 
-    app.include_router(financial_advice_router)
-    app.include_router(financial_insights_router)
-    app.include_router(review_router)
-    app.include_router(update_category_router)
-    app.include_router(goals_router, tags=["Goals"])
-    app.include_router(gmail_router)
-    app.include_router(transactions_router)
+    root_router = APIRouter(prefix="api")
+
+    root_router.include_router(financial_advice_router)
+    root_router.include_router(financial_insights_router)
+    root_router.include_router(review_router)
+    root_router.include_router(update_category_router)
+    root_router.include_router(goals_router, tags=["Goals"])
+    root_router.include_router(gmail_router)
+    root_router.include_router(transactions_router)
+    app.include_router(root_router)
     return app 
